@@ -96,11 +96,3 @@ import datetime
 
 aujourdhui = datetime.datetime.now()
 print(aujourdhui)
-
-
-
-
-
-
-    
-    

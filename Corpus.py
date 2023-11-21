@@ -3,6 +3,9 @@
 from Classes import Author
 from Classes_filles import RedditDocument, ArxivDocument
  
+import re
+import pandas as pd
+
 # =============== 2.7 : CLASSE CORPUS ===============
 class Corpus:
     def __init__(self, nom):
@@ -49,6 +52,59 @@ class Corpus:
         
         return "\n".join(list(map(str, docs)))
 
+
+    # =============== TD6 1.1 : Recherche mot-clé ===============
+    def search(self, texte, mot_cle):
+        res = []
+        #insensible à la case et trouve le mot en entier
+        matches = re.finditer(r'\b{}\b'.format(re.escape(mot_cle)), texte, flags=re.IGNORECASE)
+        passages = [match.group(0) for match in matches]
+        if passages:
+            res.append({'passages': passages})
+        return res
+
+    # =============== TD6 1.2 : Construction du concordancier ===============
+    def concorde(self, texte, mot_cle, contexte=10):
+        res = []
+
+        matches = re.finditer(r'\b{}\b'.format(re.escape(mot_cle)), texte, flags=re.IGNORECASE)
+            
+        for match in matches:
+            start = max(0, match.start() - contexte)
+            end = min(len(texte), match.end() + contexte)
+            context = texte[start:end]
+
+            res.append({
+                'contexte_gauche': context[:contexte],
+                'motif_trouve': match.group(0),
+                'contexte_droit': context[-contexte:]
+            })
+
+        # Convertir les résultats en un DataFrame pandas
+        df = pd.DataFrame(res)
+        return df
+
+    # =============== TD 6 2.2 : Création du Vocabulaire ===============
+    def creer_vocabulaire(self):
+        vocabulaire = set()
+        occurences = {}
+
+        # Parcourir tous les documents du corpus
+        for doc in self.id2doc.values():
+            # Diviser le texte en mots en utilisant différents délimiteurs
+            mots = [mot for mot in re.split(r'\s+|[.,;\'"!?]', doc.texte) if mot]
+            # Ajouter chaque mot unique au vocabulaire
+            vocabulaire.update(mots)
+        
+        # Compter les occurrences de chaque mot
+        for mot in mots:
+            occurences[mot] = occurences.get(mot, 0) + 1
+
+        # Construire un tableau de fréquences avec la bibliothèque Pandas
+        freq = pd.DataFrame(list(occurences.items()), columns=['Mot', 'Occurences'])
+        freq = freq.sort_values(by='Occurences', ascending=False)
+
+        return list(vocabulaire), freq
 
 
 
