@@ -106,7 +106,3 @@ class Corpus:
         freq = freq.sort_values(by='Occurences', ascending=False)
 
         return list(vocabulaire), freq
-
-
-
-print("TEST")
