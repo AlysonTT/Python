@@ -85,28 +85,35 @@ class Corpus:
         df = pd.DataFrame(res)
         return df
 
-    # =============== TD 6 2.2 : Création du Vocabulaire ===============
+    # =============== TD 6 2.3 : Création du Vocabulaire et du tableau de fréquence ===============
     def creer_vocabulaire(self):
         vocabulaire = set()
-        occurences = {}
-
+        occurrences = {}
+        # pour chaque mot, une liste des doc où on le trouve
+        mot_par_doc = {}
+        
         # Parcourir tous les documents du corpus
         for doc in self.id2doc.values():
-            # Diviser le texte en mots en utilisant différents délimiteurs
-            mots = [mot for mot in re.split(r'\s+|[.,;\'"!?]', doc.texte) if mot]
+            # On divise le texte en mots en utilisant différents délimiteurs 
+            # on ajoute dans mots que les mots trouves
+            mots = [mot for mot in re.split(r'\s+|[.,;\'"!?()]', doc.texte) if mot]
             # Ajouter chaque mot unique au vocabulaire
             vocabulaire.update(mots)
-        
-        # Compter les occurrences de chaque mot
-        for mot in mots:
-            occurences[mot] = occurences.get(mot, 0) + 1
+    
+            for mot in mots:
+                # Ajouter l'identifiant du document à mot_par_doc
+                if mot not in mot_par_doc:
+                    mot_par_doc[mot] = set()
+                mot_par_doc[mot].add(doc.numDoc)
+                # Compter les occurrences de chaque mot
+                occurrences[mot] = occurrences.get(mot, 0) + 1
 
         # Construire un tableau de fréquences avec la bibliothèque Pandas
-        freq = pd.DataFrame(list(occurences.items()), columns=['Mot', 'Occurences'])
+        freq = pd.DataFrame(list(occurrences.items()), columns=['Mot', 'Occurences'])
+        #ajout d'une nouvelle colonne dans le tableau des fréquences
+        #qui indique dans combien de doc le mot est présent
+        freq['Nombre de document'] = [len(docs) for docs in mot_par_doc.values()]
+
         freq = freq.sort_values(by='Occurences', ascending=False)
 
         return list(vocabulaire), freq
-
-
-
-print("TEST")

@@ -86,6 +86,7 @@ from Classes import Document
 # =============== 2.3 : MANIPS ===============
 import datetime
 collection = []
+
 for nature, doc in docs_bruts:
     if nature == "ArXiv":  # Les fichiers de ArXiv ou de Reddit sont pas formatés de la même manière à ce stade.
         #showDictStruct(doc)
@@ -97,11 +98,10 @@ for nature, doc in docs_bruts:
             authors = doc["author"]["name"]  # Si l'auteur est seul, pas besoin de liste
         summary = doc["summary"].replace("\n", "")  # On enlève les retours à la ligne
         date = datetime.datetime.strptime(doc["published"], "%Y-%m-%dT%H:%M:%SZ").strftime("%Y/%m/%d")  # Formatage de la date en année/mois/jour avec librairie datetime
-        typeDoc = "arxiv"
 
         doc_classe = Document(titre, authors, date, doc["id"], summary)  # Création du Document
         collection.append(doc_classe)  # Ajout du Document à la liste.
-
+    
     elif nature == "Reddit":
         #print("".join([f"{k}: {v}\n" for k, v in doc.__dict__.items()]))
         titre = doc.title.replace("\n", '')
@@ -109,15 +109,15 @@ for nature, doc in docs_bruts:
         date = datetime.datetime.fromtimestamp(doc.created).strftime("%Y/%m/%d")
         url = "https://www.reddit.com/"+doc.permalink
         texte = doc.selftext.replace("\n", "")
-        typeDoc = "reddit"
+        
         doc_classe = Document(titre, auteur, date, url, texte)
-
         collection.append(doc_classe)
-
+        
 # Création de l'index de documents
 id2doc = {}
 for i, doc in enumerate(collection):
     id2doc[i] = doc.titre
+    doc.numDoc = i
 
 # =============== 2.4, 2.5 : CLASSE AUTEURS ===============
 from Classes import Author
@@ -144,6 +144,7 @@ corpus = Corpus("Mon corpus")
 # Construction du corpus à partir des documents
 for doc in collection:
     corpus.add(doc)
+
 #corpus.show(tri="abc")
 #print(repr(corpus))
 
@@ -165,6 +166,14 @@ with open("corpus.pkl", "rb") as f:
 # La variable est réapparue
 #print(corpus)
 
+
+# Initialisez la chaîne vide pour stocker le texte total
+texteTotal = ""
+
+# Parcourir tous les documents du corpus et concaténer les textes
+for doc in corpus.id2doc.values():
+    texteTotal += doc.texte
+
 # =============== TD6 2.1 : Nettoyage du texte ===============
 import re
 
@@ -181,11 +190,13 @@ def nettoyer_texte(texte):
     return texte
 
 # =============== TD 6 : TEST ===============
-'''res = corpus.search(longueChaineDeCaracteres, "morning")
+
+'''
+res = corpus.search(longueChaineDeCaracteres, "to")
 print(res)
 
 # Utilisez la fonction corcorde pour obtenir les concordances pour le mot-clé en 2ème position
-df_concorde = corpus.concorde(longueChaineDeCaracteres, "morning", contexte=15)
+df_concorde = corpus.concorde(longueChaineDeCaracteres, "compared", contexte=15)
 
 # Affichez le DataFrame pandas avec les résultats de la concordance
 print(df_concorde)
@@ -197,7 +208,7 @@ print(texte_nettoyer)
 vocabulaire_corpus, tableau_frequences = corpus.creer_vocabulaire()
 
 # Afficher le vocabulaire
-print("Vocabulaire :", vocabulaire_corpus)
+#print("Vocabulaire :", vocabulaire_corpus)
 
 # Afficher le tableau de fréquences
 print("Tableau de Fréquences :\n", tableau_frequences)

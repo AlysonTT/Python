@@ -3,12 +3,13 @@
 # =============== 2.1 : La classe Document ===============
 class Document:
     # Initialisation des variables de la classe
-    def __init__(self, titre="", auteur="", date="", url="", texte=""):
+    def __init__(self, titre="", auteur="", date="", url="", texte="", numDoc=""):
         self.titre = titre
         self.auteur = auteur
         self.date = date
         self.url = url
         self.texte = texte
+        self.numDoc = numDoc
 
 # =============== 2.2 : REPRESENTATIONS ===============
     # Fonction qui renvoie le texte à afficher lorsqu'on tape repr(classe)
