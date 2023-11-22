@@ -12,7 +12,7 @@ class RedditDocument(Document):
         self.nb_com=nb_com
 
     def __str__(self):
-        return f"Source: {self.getType()}-Auteur : {self.auteur}\t# titre : {self.titre}\t# nombres de commentaires : {self.nb_com}"
+        return f"Source: {self.getType()} \t# Auteur : {self.auteur}\t# titre : {self.titre}\t# nombres de commentaires : {self.nb_com}"
 
     def getType(self):
         return self.__class__.__name__
@@ -29,7 +29,7 @@ class ArxivDocument(Document):
         self.__co_auteurs=co_auteurs
 
     def __str__(self):
-        return f"Source: {self.getType()}-Co-Auteur : {self.co_auteurs}\t# titre : {self.titre}"
+        return f"Source: {self.getType()} \t# Co-Auteur : {self.co_auteurs}\t# titre : {self.titre}"
 
 #TD5 : 3.2
     def getType(self):

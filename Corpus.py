@@ -7,6 +7,7 @@ import re
 import pandas as pd
 
 # =============== 2.7 : CLASSE CORPUS ===============
+#@singleton
 class Corpus:
     def __init__(self, nom):
         self.nom = nom

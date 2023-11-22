@@ -1,5 +1,15 @@
 from Classes_filles import RedditDocument, ArxivDocument
 
+#TD5 SIGLETON
+
+def singleton(cls): 
+    instance = [None]
+    def wrapper(*args, **kwargs):
+        if instance[0] is None:
+            instance[0] = cls(*args, **kwargs)
+        return instance[0]
+    return wrapper
+
 # Factory pour créer des documents
 class DocumentFactory:
     def create_document(self, doc_type, **kwargs):
