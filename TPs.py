@@ -180,26 +180,6 @@ def nettoyer_texte(texte):
 
     return texte
 
-# =============== TD6 2.2 : Création du vocabulaire ===============
-'''
-# Initialiser un ensemble pour stocker le vocabulaire
-vocabulaire = set()
-
-# Boucler sur chaque document dans votre corpus
-for doc in corpus.documents:
-    # Diviser le texte en mots en utilisant différents délimiteurs
-    mots = re.split(r'\s+|[.,;\'"!?]', doc.texte)
-    
-    # Ajouter chaque mot unique à l'ensemble
-    vocabulaire.update(mots)
-
-# Convertir l'ensemble en liste si nécessaire
-liste_vocabulaire = list(vocabulaire)
-
-# Afficher le vocabulaire
-print(liste_vocabulaire)
-'''
-
 # =============== TD 6 : TEST ===============
 '''res = corpus.search(longueChaineDeCaracteres, "morning")
 print(res)
