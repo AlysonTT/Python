@@ -174,20 +174,7 @@ texteTotal = ""
 for doc in corpus.id2doc.values():
     texteTotal += doc.texte
 
-# =============== TD6 2.1 : Nettoyage du texte ===============
-import re
 
-def nettoyer_texte(texte):
-    # Mise en minuscules
-    texte = texte.lower()
-
-    # Remplacement des passages à la ligne
-    texte = texte.replace("\n", " ")
-
-    # Remplacement des ponctuations et des chiffres
-    texte = re.sub(r'[^\w\s]', '', texte)
-
-    return texte
 
 # =============== TD 6 : TEST ===============
 

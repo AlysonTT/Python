@@ -85,10 +85,21 @@ class Corpus:
         df = pd.DataFrame(res)
         return df
 
+    # =============== TD6 2.1 : Nettoyage du texte ===============
+    def nettoyer_texte(self, texte):
+        # Mise en minuscules
+        texte = texte.lower()
+
+        # Remplacement des passages à la ligne
+        texte = texte.replace("\n", " ")
+
+        # Remplacement des ponctuations et des chiffres
+        texte = re.sub(r'[^\w\s]', '', texte)
+
+        return texte
+    
     # =============== TD 6 2.3 : Création du Vocabulaire et du tableau de fréquence ===============
     # =========== TD7 1.1
-    # ============= TD7 voir pour trier les mots
-
     def creer_vocabulaire(self):
         vocabulaire = set()
         occurrences = {}
@@ -100,9 +111,12 @@ class Corpus:
 
         # Parcourir tous les documents du corpus
         for doc in self.id2doc.values():
+            #nettoyage du texte avant de chercher les futurs mots du vocabulaire
+            texte_nettoye = self.nettoyer_texte(doc.texte)
+
             # On divise le texte en mots en utilisant différents délimiteurs 
             # on ajoute dans "mots" les mots trouves dans le doc
-            mots = [mot for mot in re.split(r'\s+|[.,;\'"!?()]', doc.texte) if mot]
+            mots = [mot for mot in re.split(r'\s+|[.,;\'"!?()]', texte_nettoye) if mot]
             # Ajouter chaque mot unique au vocabulaire
             vocabulaire.update(mots)
             
@@ -161,7 +175,7 @@ class Corpus:
         '''
         #docs est associé au doc_1, doc_2, ..., doc_n
         #regarder pour chaque documents si le mots est dans le document et creer une liste
-        mat_TF = csr_matrix( ( ) , shape=(len(docs), len(vocabulaire))).toarray()
+        mat_TF = 0#csr_matrix( ( ) , shape=(len(docs), len(vocabulaire))).toarray()
 
         return vocab, list(vocabulaire), freq, mat_TF
 
