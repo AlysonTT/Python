@@ -215,7 +215,7 @@ dictionnaire_vocab, vocabulaire_corpus, tableau_frequences, matrice_TF = corpus.
 #print("Tableau de Fréquences :\n", tableau_frequences)
 
 # Afficher le tableau de fréquences
-#print("Dictionnaire :\n", dictionnaire_vocab)
+print("Dictionnaire :\n", dictionnaire_vocab)
 
 # Afficher le tableau de fréquences
-print("Matrice_TF :\n", matrice_TF)
+#print("Matrice_TF :\n", matrice_TF)

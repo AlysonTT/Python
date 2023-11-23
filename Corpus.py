@@ -88,6 +88,7 @@ class Corpus:
     # =============== TD 6 2.3 : Création du Vocabulaire et du tableau de fréquence ===============
     # =========== TD7 1.1
     # ============= TD7 voir pour trier les mots
+
     def creer_vocabulaire(self):
         vocabulaire = set()
         occurrences = {}
@@ -96,16 +97,16 @@ class Corpus:
         # initialisation 
         vocab = {}
         mot_id = 0
-        
+
         # Parcourir tous les documents du corpus
         for doc in self.id2doc.values():
             # On divise le texte en mots en utilisant différents délimiteurs 
-            # on ajoute dans mots que les mots trouves
+            # on ajoute dans "mots" les mots trouves dans le doc
             mots = [mot for mot in re.split(r'\s+|[.,;\'"!?()]', doc.texte) if mot]
             # Ajouter chaque mot unique au vocabulaire
             vocabulaire.update(mots)
-
-            ### 2.2 Création de la mtrice
+            
+            ### 2.2 Création de la matrice
             from scipy.sparse import csr_matrix 
             import numpy as np
             #créeation de la matrice
@@ -118,10 +119,13 @@ class Corpus:
                 # Ajouter l'identifiant du document à mot_par_doc
                 if mot not in mot_par_doc:
                     mot_par_doc[mot] = set()
+                    #a chaque fois qu'on trouve un mot qui est pas dans le doc
+                    #on incremente l'id du mot
+                    mot_id+=1
                 mot_par_doc[mot].add(doc.numDoc)
 
-                #test id td7
-                mot_id = vocab.setdefault(mot, mot_id)
+                #ajoute au mot son identifiant unique
+                vocab.setdefault(mot, mot_id)
 
                 # Compter les occurrences de chaque mot
                 occurrences[mot] = occurrences.get(mot, 0) + 1
@@ -132,22 +136,19 @@ class Corpus:
 
         # Construire un tableau de fréquences avec la bibliothèque Pandas
         freq = pd.DataFrame(list(occurrences.items()), columns=['Mot', 'Occurences'])
+        
         #ajout d'une nouvelle colonne dans le tableau des fréquences
         #qui indique dans combien de doc le mot est présent
-        
-        #Test definitir nb doc
-        #nb_doc=[len(docs) for docs in mot_par_doc.values()]
-
         freq['Nombre de document'] = [len(docs) for docs in mot_par_doc.values()]
 
         # Tri par ordre décroissant des occurrences
         freq = freq.sort_values(by='Occurences', ascending=False)
-        
-        # Mettre à jour les identifiants uniques dans le dictionnaire vocab
-        #trier le dictionnaire dans l'ordre sorted
-        for mot, info in vocab.items():
-            #pb avec mot_par_doc
-            vocab[mot] = {'id': info, 'occurrences': occurrences[mot], 'nb doc': mot_par_doc[mot] }
+
+        #Test definitir nb doc
+        #nb_doc=[len(docs) for docs in mot_par_doc.values()
+
+        #trie le dictionnaire dans l'ordre alphabetique des mots
+        vocab = {mot: {'id': info, 'occurrences': occurrences[mot], 'nb doc': len(mot_par_doc[mot])} for mot, info in sorted(vocab.items())}  
 
         #créeation de la matrice
         #mat_TF = csr_matrix(freq)
