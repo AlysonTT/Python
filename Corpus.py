@@ -86,11 +86,16 @@ class Corpus:
         return df
 
     # =============== TD 6 2.3 : Création du Vocabulaire et du tableau de fréquence ===============
+    # =========== TD7 1.1
+    # ============= TD7 voir pour trier les mots
     def creer_vocabulaire(self):
         vocabulaire = set()
         occurrences = {}
         # pour chaque mot, une liste des doc où on le trouve
         mot_par_doc = {}
+        # initialisation 
+        vocab = {}
+        mot_id = 0
         
         # Parcourir tous les documents du corpus
         for doc in self.id2doc.values():
@@ -105,6 +110,10 @@ class Corpus:
                 if mot not in mot_par_doc:
                     mot_par_doc[mot] = set()
                 mot_par_doc[mot].add(doc.numDoc)
+
+                #test id td7
+                mot_id = vocab.setdefault(mot, mot_id)
+
                 # Compter les occurrences de chaque mot
                 occurrences[mot] = occurrences.get(mot, 0) + 1
 
@@ -114,6 +123,54 @@ class Corpus:
         #qui indique dans combien de doc le mot est présent
         freq['Nombre de document'] = [len(docs) for docs in mot_par_doc.values()]
 
+        # Tri par ordre décroissant des occurrences
         freq = freq.sort_values(by='Occurences', ascending=False)
+        
+        # Mettre à jour les identifiants uniques dans le dictionnaire vocab
+        #trier le dictionnaire dans l'ordre sorted
+        for mot, info in vocab.items():
+            vocab[mot] = {'id': info, 'occurrences': occurrences[mot], 'nb doc': mot_par_doc[mot] }
 
-        return list(vocabulaire), freq
+        return vocab, list(vocabulaire), freq
+
+        #return list(vocabulaire), freq
+
+    ################### TD7
+    '''
+    from collections import defaultdict
+
+    def construire_vocab(docs):
+        vocab = {}
+        mot_id = 0
+
+        # Parcourir tous les documents
+        for doc in docs:
+            # Découper le document en mots et les convertir en minuscules
+            mots = [mot.lower() for mot in doc.split()]
+
+            # Supprimer les doublons
+            mots_uniques = list(set(mots))
+
+            # Trier les mots par ordre alphabétique
+            mots_uniques.sort()
+
+            # Mettre à jour le dictionnaire vocab
+            for mot in mots_uniques:
+                if mot not in vocab:
+                    # Si le mot n'est pas déjà dans le dictionnaire, l'ajouter
+                    vocab[mot] = {'id': mot_id, 'occurrences': mots.count(mot)}
+                    mot_id += 1
+                else:
+                    # Si le mot est déjà dans le dictionnaire, mettre à jour le nombre d'occurrences
+                    vocab[mot]['occurrences'] += mots.count(mot)
+
+        return vocab
+
+    # Exemple d'utilisation avec une liste de documents
+    documents = ["Ceci est un exemple de document.", "Un autre exemple de document."]
+    resultat_vocab = construire_vocab(documents)
+
+    # Afficher le résultat
+    for mot, info in resultat_vocab.items():
+        print(f"Mot: {mot}, ID: {info['id']}, Occurrences: {info['occurrences']}")
+    '''
