@@ -5,6 +5,8 @@ from Classes_filles import RedditDocument, ArxivDocument
  
 import re
 import pandas as pd
+from scipy.sparse import csr_matrix 
+import numpy as np
 
 # =============== 2.7 : CLASSE CORPUS ===============
 #@singleton
@@ -103,13 +105,18 @@ class Corpus:
     # =============== TD 7 1.2 : Création de la matrice ===============
 
     def creer_vocabulaire(self):
+        nombre_doc_total = len(self.id2doc)
+        #utiliser pour créer le tableau de fréquence
         vocabulaire = set()
         occurrences = {}
         # pour chaque mot, une liste des doc où on le trouve
         mot_par_doc = {}
-        # initialisation 
+        #utiliser pour créer le dictionnaire des mots
         vocab = {}
         mot_id = 0
+
+        #utiliser pour la matrice creuse math_TF
+        row, col, data = [], [], []
 
         # Parcourir tous les documents du corpus
         for doc in self.id2doc.values():
@@ -121,15 +128,7 @@ class Corpus:
             mots = [mot for mot in re.split(r'\s+|[.,;\'"!?()]', texte_nettoye) if mot]
             # Ajouter chaque mot unique au vocabulaire
             vocabulaire.update(mots)
-            
-            ### 2.2 Création de la matrice
-            from scipy.sparse import csr_matrix 
-            import numpy as np
-            #créeation de la matrice
-            #pas le bonne matrice utiliser csr_matrix
-            #pas compris
-            #mat_TF = np.zeros((len(self.id2doc.values()),len(vocabulaire)))
-            #print(mat_TF)
+
 
             for mot in mots:
                 # Ajouter l'identifiant du document à mot_par_doc
@@ -140,15 +139,16 @@ class Corpus:
                     mot_id+=1
                 mot_par_doc[mot].add(doc.numDoc)
 
-                #ajoute au mot son identifiant unique
+                # Ajout au mot son identifiant unique
                 vocab.setdefault(mot, mot_id)
 
                 # Compter les occurrences de chaque mot
                 occurrences[mot] = occurrences.get(mot, 0) + 1
 
-                #ICI AJOUTER LES VALEURS DANS MAT_TF
-                #Peut-etre pas en faite
-            
+                # Ajout au doc une occurence du mot trouvé dans celui-ci
+                row.append(doc.numDoc)
+                col.append(mot_id)
+                data.append(1)  # a chaque occurrence on ajoute 1
 
         # Construire un tableau de fréquences avec la bibliothèque Pandas
         freq = pd.DataFrame(list(occurrences.items()), columns=['Mot', 'Occurences'])
@@ -160,25 +160,10 @@ class Corpus:
         # Tri par ordre décroissant des occurrences
         freq = freq.sort_values(by='Occurences', ascending=False)
 
-        #Test definir nb doc
-        #nb_doc=[len(docs) for docs in mot_par_doc.values()
-
-        #trie le dictionnaire dans l'ordre alphabetique des mots
+        #On trie le dictionnaire dans l'ordre alphabetique des mots
         vocab = {mot: {'id': info, 'occurrences': occurrences[mot], 'nb doc': len(mot_par_doc[mot])} for mot, info in sorted(vocab.items())}  
 
-        #créeation de la matrice
-        #mat_TF = csr_matrix(freq)
-        #mat_TF = csr_matrix((4, 4), dtype = np.int8).toarray() #fonctionne
-        '''
-        row = np.array([0, 1, 3, 0])
-        col = np.array([0, 2, 1, 2])
-        data = np.array([3, 1, 8, 9])
-        mat_TF = csr_matrix((data, (row, col)), shape=(4, 4)).toarray()
-        '''
-        #docs est associé au doc_1, doc_2, ..., doc_n
-        #regarder pour chaque documents si le mots est dans le document et creer une liste
-        mat_TF = 0#csr_matrix( ( ) , shape=(len(docs), len(vocabulaire))).toarray()
+        #ajouter 1 au nombre des colonnes(mot) et de ligne(nb_doc) pour avoir accès aux mots du dernier doc
+        mat_TF= csr_matrix((data, (row, col)), shape=(nombre_doc_total+1, len(vocabulaire)+1)).toarray()
 
         return vocab, list(vocabulaire), freq, mat_TF
-
-        #return list(vocabulaire), freq

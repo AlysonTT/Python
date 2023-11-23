@@ -86,11 +86,11 @@ from Classes import Document
 # =============== 2.3 : MANIPS ===============
 import datetime
 collection = []
-
+id_doc=1
 for nature, doc in docs_bruts:
+
     if nature == "ArXiv":  # Les fichiers de ArXiv ou de Reddit sont pas formatés de la même manière à ce stade.
         #showDictStruct(doc)
-
         titre = doc["title"].replace('\n', '')  # On enlève les retours à la ligne
         try:
             authors = ", ".join([a["name"] for a in doc["author"]])  # On fait une liste d'auteurs, séparés par une virgule
@@ -99,9 +99,10 @@ for nature, doc in docs_bruts:
         summary = doc["summary"].replace("\n", "")  # On enlève les retours à la ligne
         date = datetime.datetime.strptime(doc["published"], "%Y-%m-%dT%H:%M:%SZ").strftime("%Y/%m/%d")  # Formatage de la date en année/mois/jour avec librairie datetime
 
-        doc_classe = Document(titre, authors, date, doc["id"], summary)  # Création du Document
+        doc_classe = Document(titre, authors, date, doc["id"], summary, numDoc=id_doc)  # Création du Document
+        id_doc+=1
         collection.append(doc_classe)  # Ajout du Document à la liste.
-    
+
     elif nature == "Reddit":
         #print("".join([f"{k}: {v}\n" for k, v in doc.__dict__.items()]))
         titre = doc.title.replace("\n", '')
@@ -110,14 +111,15 @@ for nature, doc in docs_bruts:
         url = "https://www.reddit.com/"+doc.permalink
         texte = doc.selftext.replace("\n", "")
         
-        doc_classe = Document(titre, auteur, date, url, texte)
+        doc_classe = Document(titre, auteur, date, url, texte, numDoc=id_doc)
+        id_doc+=1
         collection.append(doc_classe)
-        
+ 
 # Création de l'index de documents
 id2doc = {}
 for i, doc in enumerate(collection):
     id2doc[i] = doc.titre
-    doc.numDoc = i
+    #doc.numDoc = i
 
 # =============== 2.4, 2.5 : CLASSE AUTEURS ===============
 from Classes import Author
@@ -202,7 +204,7 @@ dictionnaire_vocab, vocabulaire_corpus, tableau_frequences, matrice_TF = corpus.
 #print("Tableau de Fréquences :\n", tableau_frequences)
 
 # Afficher le tableau de fréquences
-print("Dictionnaire :\n", dictionnaire_vocab)
+#print("Dictionnaire :\n", dictionnaire_vocab)
 
 # Afficher le tableau de fréquences
-#print("Matrice_TF :\n", matrice_TF)
+print("Matrice_TF :\n", matrice_TF)
