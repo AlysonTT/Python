@@ -206,7 +206,7 @@ texte_nettoyer = nettoyer_texte(longueChaineDeCaracteres)
 print(texte_nettoyer)
 '''
 #ajout dictionnaire vocab
-dictionnaire_vocab, vocabulaire_corpus, tableau_frequences = corpus.creer_vocabulaire()
+dictionnaire_vocab, vocabulaire_corpus, tableau_frequences, matrice_TF = corpus.creer_vocabulaire()
 
 # Afficher le vocabulaire
 #print("Vocabulaire :", vocabulaire_corpus)
@@ -215,4 +215,7 @@ dictionnaire_vocab, vocabulaire_corpus, tableau_frequences = corpus.creer_vocabu
 #print("Tableau de Fréquences :\n", tableau_frequences)
 
 # Afficher le tableau de fréquences
-print("Dictionnaire :\n", dictionnaire_vocab)
+#print("Dictionnaire :\n", dictionnaire_vocab)
+
+# Afficher le tableau de fréquences
+print("Matrice_TF :\n", matrice_TF)

@@ -104,7 +104,16 @@ class Corpus:
             mots = [mot for mot in re.split(r'\s+|[.,;\'"!?()]', doc.texte) if mot]
             # Ajouter chaque mot unique au vocabulaire
             vocabulaire.update(mots)
-    
+
+            ### 2.2 Création de la mtrice
+            from scipy.sparse import csr_matrix 
+            import numpy as np
+            #créeation de la matrice
+            #pas le bonne matrice utiliser csr_matrix
+            #pas compris
+            #mat_TF = np.zeros((len(self.id2doc.values()),len(vocabulaire)))
+            #print(mat_TF)
+
             for mot in mots:
                 # Ajouter l'identifiant du document à mot_par_doc
                 if mot not in mot_par_doc:
@@ -117,10 +126,18 @@ class Corpus:
                 # Compter les occurrences de chaque mot
                 occurrences[mot] = occurrences.get(mot, 0) + 1
 
+                #ICI AJOUTER LES VALEURS DANS MAT_TF
+                #Peut-etre pas en faite
+            
+
         # Construire un tableau de fréquences avec la bibliothèque Pandas
         freq = pd.DataFrame(list(occurrences.items()), columns=['Mot', 'Occurences'])
         #ajout d'une nouvelle colonne dans le tableau des fréquences
         #qui indique dans combien de doc le mot est présent
+        
+        #Test definitir nb doc
+        #nb_doc=[len(docs) for docs in mot_par_doc.values()]
+
         freq['Nombre de document'] = [len(docs) for docs in mot_par_doc.values()]
 
         # Tri par ordre décroissant des occurrences
@@ -129,11 +146,28 @@ class Corpus:
         # Mettre à jour les identifiants uniques dans le dictionnaire vocab
         #trier le dictionnaire dans l'ordre sorted
         for mot, info in vocab.items():
+            #pb avec mot_par_doc
             vocab[mot] = {'id': info, 'occurrences': occurrences[mot], 'nb doc': mot_par_doc[mot] }
 
-        return vocab, list(vocabulaire), freq
+        #créeation de la matrice
+        #mat_TF = csr_matrix(freq)
+        #mat_TF = csr_matrix((4, 4), dtype = np.int8).toarray() #fonctionne
+        '''
+        row = np.array([0, 1, 3, 0])
+        col = np.array([0, 2, 1, 2])
+        data = np.array([3, 1, 8, 9])
+        mat_TF = csr_matrix((data, (row, col)), shape=(4, 4)).toarray()
+        '''
+        #docs est associé au doc_1, doc_2, ..., doc_n
+        #regarder pour chaque documents si le mots est dans le document et creer une liste
+        mat_TF = csr_matrix( ( ) , shape=(len(docs), len(vocabulaire))).toarray()
+
+        return vocab, list(vocabulaire), freq, mat_TF
 
         #return list(vocabulaire), freq
+
+    # 1.2
+
 
     ################### TD7
     '''
