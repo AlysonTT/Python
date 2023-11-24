@@ -150,7 +150,6 @@ for doc in collection:
 #corpus.show(tri="abc")
 #print(repr(corpus))
 
-
 # =============== 2.9 : SAUVEGARDE ===============
 import pickle
 
@@ -176,8 +175,6 @@ texteTotal = ""
 for doc in corpus.id2doc.values():
     texteTotal += doc.texte
 
-
-
 # =============== TD 6 : TEST ===============
 
 '''
@@ -194,6 +191,7 @@ print(df_concorde)
 texte_nettoyer = nettoyer_texte(longueChaineDeCaracteres)
 print(texte_nettoyer)
 '''
+#print(corpus)
 #ajout dictionnaire vocab
 dictionnaire_vocab, vocabulaire_corpus, tableau_frequences, matrice_TF = corpus.creer_vocabulaire()
 
@@ -204,7 +202,7 @@ dictionnaire_vocab, vocabulaire_corpus, tableau_frequences, matrice_TF = corpus.
 #print("Tableau de Fréquences :\n", tableau_frequences)
 
 # Afficher le tableau de fréquences
-#print("Dictionnaire :\n", dictionnaire_vocab)
+print("Dictionnaire :\n", dictionnaire_vocab)
 
 # Afficher le tableau de fréquences
-print("Matrice_TF :\n", matrice_TF)
+#print("Matrice_TF :\n", matrice_TF)

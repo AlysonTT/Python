@@ -129,7 +129,6 @@ class Corpus:
             # Ajouter chaque mot unique au vocabulaire
             vocabulaire.update(mots)
 
-
             for mot in mots:
                 # Ajouter l'identifiant du document à mot_par_doc
                 if mot not in mot_par_doc:
@@ -161,9 +160,20 @@ class Corpus:
         freq = freq.sort_values(by='Occurences', ascending=False)
 
         #On trie le dictionnaire dans l'ordre alphabetique des mots
-        vocab = {mot: {'id': info, 'occurrences': occurrences[mot], 'nb doc': len(mot_par_doc[mot])} for mot, info in sorted(vocab.items())}  
+        #vocab = {mot: {'id': info, 'occurrences': occurrences[mot], 'nb doc': len(mot_par_doc[mot])} for mot, info in sorted(vocab.items())}  
+        # dans la définition de vocab au dessus pb avec info qui ne sert à rien remplacé par vocab[mot]
+        vocab = {mot: {'id': vocab[mot]} for mot in sorted(vocab)}  
+        
 
         #ajouter 1 au nombre des colonnes(mot) et de ligne(nb_doc) pour avoir accès aux mots du dernier doc
         mat_TF= csr_matrix((data, (row, col)), shape=(nombre_doc_total+1, len(vocabulaire)+1)).toarray()
 
+        # Calculer le nombre total d'occurrences dans le corpus et le nombre total de documents contenant chaque mot
+        for mot in sorted(vocab):
+            # Ajoute les informations mises à jour dans le dictionnaire vocab
+            vocab[mot]['occurrences_corpus'] = mat_TF[:, vocab[mot]['id']].sum()
+            vocab[mot]['nb_doc_corpus'] = np.count_nonzero(mat_TF[:, vocab[mot]['id']])
+        
         return vocab, list(vocabulaire), freq, mat_TF
+
+        #decalage de 1 entre id de fre et id de vocab
