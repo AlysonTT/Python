@@ -184,7 +184,7 @@ print(df_concorde)
 #ajout dictionnaire vocab
 
 #creation du dictionnaire des mots et des matrices
-dictionnaire_vocab, vocabulaire_corpus, tableau_frequences, matrice_TF, matrice_TFxIDF = corpus.creer_vocabulaire()
+dictionnaire_vocab, dictionnaire_vocab1, vocabulaire_corpus, tableau_frequences, matrice_TF, matrice_TFxIDF = corpus.creer_vocabulaire()
 
 # Afficher le vocabulaire
 #print("Vocabulaire :", vocabulaire_corpus)
@@ -193,10 +193,30 @@ dictionnaire_vocab, vocabulaire_corpus, tableau_frequences, matrice_TF, matrice_
 #print("Tableau de Fréquences :\n", tableau_frequences)
 
 # Afficher le tableau de fréquences
-print("Dictionnaire :\n", dictionnaire_vocab)
+#print("Dictionnaire :\n", dictionnaire_vocab)
 
 # Afficher la Matrice TF
-print("Matrice_TF :\n", matrice_TF)
+#print("Matrice_TF :\n", matrice_TF)
 
 # Afficher la Matrice TFxIDF
-print("Matrice_TF :\n", matrice_TFxIDF)
+#print("Matrice_TF :\n", matrice_TFxIDF)
+if dictionnaire_vocab1 == dictionnaire_vocab:
+    print("Les dictionnaires sont égaux.")
+else:
+    print("Les dictionnaires ne sont pas égaux.")
+
+from difflib import unified_diff
+
+# Convertir les objets dict_items en listes
+vocab1_items = list(dictionnaire_vocab1.items())
+vocab_items = list(dictionnaire_vocab.items())
+
+# Reformater les éléments des dictionnaires en chaînes
+vocab1_str = [f"{k}: {v}" for k, v in vocab1_items]
+vocab_str = [f"{k}: {v}" for k, v in vocab_items]
+
+# Utiliser unified_diff
+diff = list(unified_diff(vocab_str, vocab1_str))
+
+# Afficher le rapport de différences
+#print('\n'.join(diff))
