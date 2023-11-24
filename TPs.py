@@ -150,7 +150,6 @@ for doc in collection:
 #corpus.show(tri="abc")
 #print(repr(corpus))
 
-
 # =============== 2.9 : SAUVEGARDE ===============
 import pickle
 
@@ -168,9 +167,7 @@ with open("corpus.pkl", "rb") as f:
 # La variable est réapparue
 #print(corpus)
 
-
 # =============== TD 6 : TEST ===============
-
 '''
 res = corpus.search(longueChaineDeCaracteres, "to")
 print(res)
@@ -183,6 +180,8 @@ print(df_concorde)
 '''
 
 # =============== TD 7 : TEST ===============
+#print(corpus)
+#ajout dictionnaire vocab
 
 #creation du dictionnaire des mots et des matrices
 dictionnaire_vocab, vocabulaire_corpus, tableau_frequences, matrice_TF, matrice_TFxIDF = corpus.creer_vocabulaire()
@@ -194,7 +193,7 @@ dictionnaire_vocab, vocabulaire_corpus, tableau_frequences, matrice_TF, matrice_
 #print("Tableau de Fréquences :\n", tableau_frequences)
 
 # Afficher le tableau de fréquences
-#print("Dictionnaire :\n", dictionnaire_vocab)
+print("Dictionnaire :\n", dictionnaire_vocab)
 
 # Afficher la Matrice TF
 print("Matrice_TF :\n", matrice_TF)
