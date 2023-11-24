@@ -7,6 +7,7 @@ import re
 import pandas as pd
 from scipy.sparse import csr_matrix 
 import numpy as np
+from sklearn.feature_extraction.text import TfidfTransformer
 
 # =============== 2.7 : CLASSE CORPUS ===============
 #@singleton
@@ -102,7 +103,8 @@ class Corpus:
     
     # =============== TD 6 2.4 : Création du Vocabulaire et du tableau de fréquence ===============
     # =============== TD 7 1.1 : Création du dictionnaire vocab avec tri alphabétique ===============
-    # =============== TD 7 1.2 : Création de la matrice ===============
+    # =============== TD 7 1.2 : Création de la matrice creuse ===============
+    # =============== TD 7 1.4 : Création d'une 2eme matrice creuse, mesure TFxIDF===============
 
     def creer_vocabulaire(self):
         nombre_doc_total = len(self.id2doc)
@@ -114,7 +116,6 @@ class Corpus:
         #utiliser pour créer le dictionnaire des mots
         vocab = {}
         mot_id = 0
-
         #utiliser pour la matrice creuse math_TF
         row, col, data = [], [], []
 
@@ -166,4 +167,9 @@ class Corpus:
         #ajouter 1 au nombre des colonnes(mot) et de ligne(nb_doc) pour avoir accès aux mots du dernier doc
         mat_TF= csr_matrix((data, (row, col)), shape=(nombre_doc_total+1, len(vocabulaire)+1)).toarray()
 
-        return vocab, list(vocabulaire), freq, mat_TF
+        # Utiliser la bibliothèque scikit-learn pour calculer le score TF-IDF
+        tfidf_transformer = TfidfTransformer()
+        mat_TFxIDF = tfidf_transformer.fit_transform(mat_TF).toarray()
+
+        # Sauvegarder le DataFrame dans un fichier CSV
+        return vocab, list(vocabulaire), freq, mat_TF, mat_TFxIDF

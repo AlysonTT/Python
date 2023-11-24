@@ -169,15 +169,6 @@ with open("corpus.pkl", "rb") as f:
 #print(corpus)
 
 
-# Initialisez la chaîne vide pour stocker le texte total
-texteTotal = ""
-
-# Parcourir tous les documents du corpus et concaténer les textes
-for doc in corpus.id2doc.values():
-    texteTotal += doc.texte
-
-
-
 # =============== TD 6 : TEST ===============
 
 '''
@@ -189,13 +180,12 @@ df_concorde = corpus.concorde(longueChaineDeCaracteres, "compared", contexte=15)
 
 # Affichez le DataFrame pandas avec les résultats de la concordance
 print(df_concorde)
-
-#nettoyer le texte
-texte_nettoyer = nettoyer_texte(longueChaineDeCaracteres)
-print(texte_nettoyer)
 '''
-#ajout dictionnaire vocab
-dictionnaire_vocab, vocabulaire_corpus, tableau_frequences, matrice_TF = corpus.creer_vocabulaire()
+
+# =============== TD 7 : TEST ===============
+
+#creation du dictionnaire des mots et des matrices
+dictionnaire_vocab, vocabulaire_corpus, tableau_frequences, matrice_TF, matrice_TFxIDF = corpus.creer_vocabulaire()
 
 # Afficher le vocabulaire
 #print("Vocabulaire :", vocabulaire_corpus)
@@ -206,5 +196,8 @@ dictionnaire_vocab, vocabulaire_corpus, tableau_frequences, matrice_TF = corpus.
 # Afficher le tableau de fréquences
 #print("Dictionnaire :\n", dictionnaire_vocab)
 
-# Afficher le tableau de fréquences
+# Afficher la Matrice TF
 print("Matrice_TF :\n", matrice_TF)
+
+# Afficher la Matrice TFxIDF
+print("Matrice_TF :\n", matrice_TFxIDF)
