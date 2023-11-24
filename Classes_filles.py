@@ -1,8 +1,8 @@
 from Classes import Document
 
 class RedditDocument(Document):
-    def __init__(self, titre="", auteur="", date="", url="", texte="",nb_com=0):
-        super().__init__(titre=titre, auteur=auteur, date=date, url=url, texte=texte)
+    def __init__(self, titre="", auteur="", date="", url="", texte="",numDoc="",nb_com=0):
+        super().__init__(titre=titre, auteur=auteur, date=date, url=url, texte=texte, numDoc=numDoc)
         self.nb_com=nb_com
 
     def getNbCom(self):
@@ -18,8 +18,8 @@ class RedditDocument(Document):
         return self.__class__.__name__
 
 class ArxivDocument(Document):
-    def __init__(self, titre="", auteur="", date="", url="", texte="",co_auteurs=""):
-        super().__init__(titre=titre, auteur=auteur, date=date, url=url, texte=texte)
+    def __init__(self, titre="", auteur="", date="", url="", texte="",numDoc="",co_auteurs=""):
+        super().__init__(titre=titre, auteur=auteur, date=date, url=url, texte=texte,numDoc=numDoc)
         self.co_auteurs=co_auteurs
 
     def getCoAuteurs(self):
