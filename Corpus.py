@@ -104,6 +104,7 @@ class Corpus:
     # =============== TD 6 2.4 : Création du Vocabulaire et du tableau de fréquence ===============
     # =============== TD 7 1.1 : Création du dictionnaire vocab avec tri alphabétique ===============
     # =============== TD 7 1.2 : Création de la matrice creuse ===============
+    # =============== TD 7 1.3 : Création de dictionnaire vocab_mat_TF avec remplissage grace a mat_TF ===============
     # =============== TD 7 1.4 : Création d'une 2eme matrice creuse, mesure TFxIDF===============
 
     def creer_vocabulaire(self):
@@ -111,15 +112,17 @@ class Corpus:
         #utiliser pour créer le tableau de fréquence
         vocabulaire = set()
         occurrences = {}
+        mot_id = 0
         # pour chaque mot, une liste des doc où on le trouve
         mot_par_doc = {}
         #utiliser pour créer le dictionnaire des mots
         vocab = {}
-        mot_id = 0
         #utiliser pour la matrice creuse math_TF
         row, col, data = [], [], []
+        #utiliser pour créer le dictionnaire des mots avec mat_TF pour le remplir
+        vocab_mat_TF = {}
 
-        vocab1 = {}
+        
         # Parcourir tous les documents du corpus
         for doc in self.id2doc.values():
             #nettoyage du texte avant de chercher les futurs mots du vocabulaire
@@ -132,7 +135,7 @@ class Corpus:
             vocabulaire.update(mots)
 
             for mot in mots:
-                # Ajouter l'identifiant du document à mot_par_doc
+                #Cree une liste du nouveau trouve à mot_par_doc
                 if mot not in mot_par_doc:
                     mot_par_doc[mot] = set()
                     #a chaque fois qu'on trouve un mot qui est pas dans le doc
@@ -142,18 +145,15 @@ class Corpus:
 
                 # Ajout au mot son identifiant unique
                 vocab.setdefault(mot, mot_id)
-                vocab1.setdefault(mot, mot_id)
-
-                #MAJ
-                #vocab.setdefault(mot, mot_id+1)
 
                 # Compter les occurrences de chaque mot
                 occurrences[mot] = occurrences.get(mot, 0) + 1
-
+                
                 # Ajout au doc une occurence du mot trouvé dans celui-ci
                 row.append(doc.numDoc)
-                col.append(mot_id)
+                col.append(vocab[mot])
                 data.append(1)  # a chaque occurrence on ajoute 1
+
 
         # Construire un tableau de fréquences avec la bibliothèque Pandas
         freq = pd.DataFrame(list(occurrences.items()), columns=['Mot', 'Occurences'])
@@ -166,31 +166,15 @@ class Corpus:
         freq = freq.sort_values(by='Occurences', ascending=False)
 
         #On trie le dictionnaire dans l'ordre alphabetique des mots
-        #vocab = {mot: {'id': info, 'occurrences': occurrences[mot], 'nb doc': len(mot_par_doc[mot])} for mot, info in sorted(vocab.items())}  
-        # dans la définition de vocab au dessus pb avec info qui ne sert à rien remplacé par vocab[mot]
-        vocab = {mot: {'id': vocab[mot], 'occurrences': occurrences[mot], 'nb doc': len(mot_par_doc[mot])} for mot, vocab[mot] in sorted(vocab.items())}  
+        vocab = {mot: {'id': vocab[mot], 'occurrences': occurrences[mot], 'nb_doc': len(mot_par_doc[mot])} for mot, vocab[mot] in sorted(vocab.items())}  
 
         #ajouter 1 au nombre des colonnes(mot) et de ligne(nb_doc) pour avoir accès aux mots du dernier doc
-        mat_TF= csr_matrix((data, (row, col)), shape=(nombre_doc_total+1, len(vocabulaire)+1)).toarray()
-        
-                
-        # Utiliser la bibliothèque scikit-learn pour calculer le score TF-IDF
+        mat_TF= csr_matrix((data, (row, col)), shape=(nombre_doc_total+1, len(vocabulaire)+1)).toarray()        
+
+        # Utilisation de la bibliothèque scikit-learn pour calculer le score TF-IDF
         tfidf_transformer = TfidfTransformer()
         mat_TFxIDF = tfidf_transformer.fit_transform(mat_TF).toarray()
         
-        '''
-        #TD7 1.3 EN COURS
-        JE PENSE QUE LE PB EST DANS LA DEFINITION DES LIGNES ET COLONNES DE MAT
-        # Mise à jour du dictionnaire vocab avec les informations demandées
-
-        # Somme des occurrences du mot dans toutes les lignes
-        occurrences_mot = mat_TF[:, vocab[mot]].sum()
-        
-        vocab = {mot: {'id': vocab[mot], 'occurrences': occurrences_mot} for mot, vocab[mot] in sorted(vocab.items())}  
-
-        '''
-        #decalage de 1 entre id de fre et id de vocab
-
         # On compte le nombre d'éléments non nuls sur chaque colonne
         # pour avoir le nombre de doc qui contient le mot
         #axis=0 colonne et axis=1 ligne
@@ -199,39 +183,6 @@ class Corpus:
         # On fait la somme des valeurs de chaque colonne pour avoir le nombre d'occurence de chaque mot
         somme_colonnes = np.sum(mat_TF, axis=0)
 
-        #vocab = {mot: {'id': vocab[mot], 'occurrences': occurrences[mot], 'nb doc': len(mot_par_doc[mot])} for mot, vocab[mot] in sorted(vocab.items())}  
+        vocab_mat_TF = {mot: {'id': info['id'], 'occurrences': somme_colonnes[info['id']], 'nb_doc': nombre_doc_contenant_mot[info['id']]} for mot, info in sorted(vocab.items())}
 
-        vocab1 = {mot: {'id': vocab1[mot], 'occurrences': somme_colonnes[vocab1[mot]], 'nb_doc': nombre_doc_contenant_mot[vocab1[mot]]} for mot, vocab1[mot] in sorted(vocab1.items())}
-        #vocab1 = {mot: {'id': id_mot, 'occurrences': somme_colonnes[id_mot], 'nb_doc': nombre_doc_contenant_mot[id_mot]} for mot, id_mot in sorted(vocab1.items())}
-
-        print(vocab1)
-
-       
-        '''test 1.3 Maude
-        # Définir votre matrice
-        matrice = [
-            [0, 0, 0, 2, 1],
-            [0, 0, 0, 2, 0],
-            [1, 1, 1, 1, 1],
-            [10, 10, 10, 10, 10]
-        ]
-
-        # Convertir la matrice en format CSR (Compressed Sparse Row)
-        matrice_csr = csr_matrix(matrice).toarray()
-
-        # Compter le nombre d'éléments non nuls sur chaque colonne
-        # pour avoir le nombre de doc qui contient le mot
-        #axis=0 colonne et axis=1 ligne
-        nombre_elements_non_nuls_par_ligne = np.count_nonzero(matrice_csr, axis=0)
-
-        # Afficher le résultat
-                # Faire la somme des valeurs de chaque colonne
-        somme_colonnes = np.sum(matrice_csr, axis=0)
-
-        # Afficher le résultat
-        #print(nombre_elements_non_nuls_par_ligne)
-        #print(somme_colonnes)
-        '''
-
-        return vocab, vocab1, list(vocabulaire), freq, mat_TF, mat_TFxIDF
-
+        return vocab, vocab_mat_TF, list(vocabulaire), freq, mat_TF, mat_TFxIDF
