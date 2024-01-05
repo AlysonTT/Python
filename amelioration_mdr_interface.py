@@ -33,20 +33,16 @@ def effectuer_recherche():
     # Afficher les documents qui contiennent au moins un mot-clé avec le score de similarité
     documents_retrouves = []
     for document, score_document in zip(corpus.id2doc.values(), similarite):
-        if any(mot.lower() in document.texte.lower() for mot in mots_clefs):
-            documents_retrouves.append((document, score_document))
-            print("Document trouvé (texte):", document.titre.lower())
-            print("Score:", score_document)
-            print("Nombre de documents trouvés:", len(documents_retrouves))
+        mots_trouves_texte = any(mot.lower() in document.texte.lower() for mot in mots_clefs)
+        mots_trouves_titre = any(mot.lower() in document.titre.lower() for mot in mots_clefs)
 
-    # Vérifier le titre du document
-    if any(mot.lower() in document.titre.lower() for mot in mots_clefs):
-        if document not in documents_retrouves:
-            documents_retrouves.append((document, score_document))
-            print("Document trouvé (titre):", document.titre.lower())
-            print("Score:", score_document)
-            print("Nombre de documents trouvés:", len(documents_retrouves))
-
+        # On cherche les mots clés dans le texte ou dans le titre du document
+        if mots_trouves_texte or mots_trouves_titre:
+            if document not in documents_retrouves:
+                documents_retrouves.append((document, score_document))
+                print("Document trouvé (texte):", document.titre)
+                print("Score:", score_document)
+                print("Nombre de documents trouvés:", len(documents_retrouves))
 
     # Trier les résultats par score de similarité
     documents_retrouves.sort(key=lambda x: x[1], reverse=True)
