@@ -35,6 +35,18 @@ def effectuer_recherche():
     for document, score_document in zip(corpus.id2doc.values(), similarite):
         if any(mot.lower() in document.texte.lower() for mot in mots_clefs):
             documents_retrouves.append((document, score_document))
+            print("Document trouvé (texte):", document.titre.lower())
+            print("Score:", score_document)
+            print("Nombre de documents trouvés:", len(documents_retrouves))
+
+    # Vérifier le titre du document
+    if any(mot.lower() in document.titre.lower() for mot in mots_clefs):
+        if document not in documents_retrouves:
+            documents_retrouves.append((document, score_document))
+            print("Document trouvé (titre):", document.titre.lower())
+            print("Score:", score_document)
+            print("Nombre de documents trouvés:", len(documents_retrouves))
+
 
     # Trier les résultats par score de similarité
     documents_retrouves.sort(key=lambda x: x[1], reverse=True)
@@ -58,7 +70,7 @@ def effectuer_recherche():
                 for mot in mots_clefs:
                     start_index = "1.0"
                     while start_index:
-                        start_index = zone_texte.search(mot, start_index, tk.END)
+                        start_index = zone_texte.search(mot, start_index, tk.END, nocase=True)
                         if start_index:
                             end_index = f"{start_index}+{len(mot)}c"
                             zone_texte.tag_add("rouge", start_index, end_index)

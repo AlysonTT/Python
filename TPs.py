@@ -97,6 +97,7 @@ for nature, doc in docs_bruts:
         except:
             authors = doc["author"]["name"]  # Si l'auteur est seul, pas besoin de liste
         summary = doc["summary"].replace("\n", "")  # On enlève les retours à la ligne
+
         date = datetime.datetime.strptime(doc["published"], "%Y-%m-%dT%H:%M:%SZ").strftime("%Y/%m/%d")  # Formatage de la date en année/mois/jour avec librairie datetime
 
         doc_classe = Document(titre, authors, date, doc["id"], summary, numDoc=id_doc)  # Création du Document
@@ -119,7 +120,6 @@ for nature, doc in docs_bruts:
 id2doc = {}
 for i, doc in enumerate(collection):
     id2doc[i] = doc.titre
-    #doc.numDoc = i
 
 # =============== 2.4, 2.5 : CLASSE AUTEURS ===============
 from Classes import Author
@@ -146,6 +146,10 @@ corpus = Corpus("Mon corpus")
 # Construction du corpus à partir des documents
 for doc in collection:
     corpus.add(doc)
+    print("URL ",doc.url)
+    print("title ",doc.titre)
+    print("summary ", doc.texte)
+    print("              ")
 
 #corpus.show(tri="abc")
 #print(repr(corpus))
@@ -180,7 +184,6 @@ print(df_concorde)
 '''
 
 # =============== TD 7 : TEST ===============
-#print(corpus)
 #ajout dictionnaire vocab
 
 #creation du dictionnaire des mots et des matrices
