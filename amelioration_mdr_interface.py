@@ -14,7 +14,26 @@ except ImportError:
 with open("corpus.pkl", "rb") as f:
     corpus = pickle.load(f)
 
+#fonction qui permet d'avoir qu'un type de source selectionné
+def selection_unique(index):
+    for i, var in enumerate(variables):
+        if i != index:
+            var.set(0)
+
+def checkbutton_selection():
+    # Afficher les éléments sélectionnés
+    options_selectionnees = [source[i] for i, var in enumerate(variables) if var.get()]
+    if options_selectionnees:
+        return ", ".join(options_selectionnees)
+    else:
+        return "null"
+
+
 def effectuer_recherche():
+    #Recuperer le type de source
+    type = checkbutton_selection()
+    print(type)
+
     # Etape 1 : obtenir les mots-clefs à partir du champ de texte
     mots_clefs = entry_mots_clefs.get().split()
 
@@ -38,11 +57,15 @@ def effectuer_recherche():
 
         # On cherche les mots clés dans le texte ou dans le titre du document
         if mots_trouves_texte or mots_trouves_titre:
+            print(document.url)
+            
             if document not in documents_retrouves:
-                documents_retrouves.append((document, score_document))
-                print("Document trouvé (texte):", document.titre)
-                print("Score:", score_document)
-                print("Nombre de documents trouvés:", len(documents_retrouves))
+                if type == "null" or type.lower() in document.url.lower():
+                    documents_retrouves.append((document, score_document))
+                    print("Document trouvé (texte):", document.titre)
+                    print("Score:", score_document)
+                    print("Nombre de documents trouvés:", len(documents_retrouves))
+
 
     # Trier les résultats par score de similarité
     documents_retrouves.sort(key=lambda x: x[1], reverse=True)
@@ -89,6 +112,7 @@ def afficher_corpus():
     # Afficher l'ensemble du corpus
     for document in corpus.id2doc.values():
         zone_texte.insert(tk.END, f"Titre du document: {document.titre}\n")
+        zone_texte.insert(tk.END, f"Auteurs du document: {document.auteur}\n")
         zone_texte.insert(tk.END, f"Contenu du document:\n{document.texte}\n")
         zone_texte.insert(tk.END, "=" * 150 + "\n")
 
@@ -140,6 +164,18 @@ bouton_recherche.pack(side=tk.LEFT, padx=5)
 # Créer un bouton pour afficher tout le corpus
 bouton_afficher_corpus = Button(cadre_boutons, text="Afficher Tout le Corpus", command=afficher_corpus)
 bouton_afficher_corpus.pack(side=tk.LEFT, padx=5)
+
+#Espace pour sélectionner un type de source
+# Sources disponibles
+source = ["Reddit", "ArXiv"]
+
+# Variables pour stocker l'état des Checkbuttons
+variables = [tk.IntVar() for _ in source]
+
+# Créer les Checkbuttons et les ajouter à la fenêtre
+for i, option in enumerate(source):
+    checkbutton = tk.Checkbutton(cadre_boutons, text=option, variable=variables[i], command=lambda i=i: selection_unique(i))
+    checkbutton.pack(side=tk.LEFT, padx=5)
 
 # Créer un cadre (Frame) pour contenir la zone de texte et la barre de défilement
 cadre_texte = tk.Frame(fenetre)
