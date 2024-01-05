@@ -56,16 +56,13 @@ def effectuer_recherche():
         mots_trouves_titre = any(mot.lower() in document.titre.lower() for mot in mots_clefs)
 
         # On cherche les mots clés dans le texte ou dans le titre du document
-        if mots_trouves_texte or mots_trouves_titre:
-            print(document.url)
-            
+        if mots_trouves_texte or mots_trouves_titre:           
             if document not in documents_retrouves:
                 if type == "null" or type.lower() in document.url.lower():
                     documents_retrouves.append((document, score_document))
                     print("Document trouvé (texte):", document.titre)
                     print("Score:", score_document)
                     print("Nombre de documents trouvés:", len(documents_retrouves))
-
 
     # Trier les résultats par score de similarité
     documents_retrouves.sort(key=lambda x: x[1], reverse=True)
@@ -105,16 +102,21 @@ def effectuer_recherche():
 
 
 def afficher_corpus():
+    #Recuperer le type de source
+    type = checkbutton_selection()
+    print(type)
+
     # Effacer le contenu précédent du widget de texte
     zone_texte.config(state=tk.NORMAL)
     zone_texte.delete(1.0, tk.END)
 
     # Afficher l'ensemble du corpus
     for document in corpus.id2doc.values():
-        zone_texte.insert(tk.END, f"Titre du document: {document.titre}\n")
-        zone_texte.insert(tk.END, f"Auteurs du document: {document.auteur}\n")
-        zone_texte.insert(tk.END, f"Contenu du document:\n{document.texte}\n")
-        zone_texte.insert(tk.END, "=" * 150 + "\n")
+        if type == "null" or type.lower() in document.url.lower():
+            zone_texte.insert(tk.END, f"Titre du document: {document.titre}\n")
+            zone_texte.insert(tk.END, f"Auteurs du document: {document.auteur}\n")
+            zone_texte.insert(tk.END, f"Contenu du document:\n{document.texte}\n")
+            zone_texte.insert(tk.END, "=" * 150 + "\n")
 
     # Activer la modification de la zone de texte
     zone_texte.config(state=tk.DISABLED)
