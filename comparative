@@ -14,6 +14,9 @@ except ImportError:
 with open("corpus.pkl", "rb") as f:
     corpus = pickle.load(f)
 
+# Variables pour stocker l'état des Checkbuttons
+variables = []
+
 #fonction qui permet d'avoir qu'un type de source selectionné
 def selection_unique(index):
     for i, var in enumerate(variables):
@@ -27,6 +30,7 @@ def checkbutton_selection():
         return ", ".join(options_selectionnees)
     else:
         return "null"
+
 
 
 def effectuer_recherche():
@@ -106,8 +110,27 @@ def effectuer_recherche():
         # Désactiver la modification de la zone de texte
         zone_texte.config(state=tk.DISABLED)
 
+def afficher_details_selectionnes():
+    zone_texte.config(state=tk.NORMAL)
+    zone_texte.delete(1.0, tk.END)
 
+    # Récupérer les documents sélectionnés
+    documents_selectionnes = [document for document, var in zip(corpus.id2doc.values(), variables) if var.get()]
+
+    # Afficher les détails des documents sélectionnés
+    for document in documents_selectionnes:
+        zone_texte.insert(tk.END, f"Titre du document : {document.titre}\n", "gras")
+        zone_texte.insert(tk.END, f"Auteur du document : {document.auteur}\n")
+        zone_texte.insert(tk.END, f"URL du document : {document.url}\n")
+        zone_texte.insert(tk.END, f"Contenu du document :\n{document.texte}\n")
+        zone_texte.insert(tk.END, "=" * 150 + "\n")
+
+    # Désactiver la modification de la zone de texte
+    zone_texte.config(state=tk.DISABLED)
+
+# Modifiez la fonction afficher_corpus pour ajouter des boutons de sélection
 def afficher_corpus():
+
     #Recuperer le type de source
     type = checkbutton_selection()
     print(type)
@@ -116,17 +139,32 @@ def afficher_corpus():
     zone_texte.config(state=tk.NORMAL)
     zone_texte.delete(1.0, tk.END)
 
-    # Afficher l'ensemble du corpus
+    # Dictionnaire pour stocker les boutons par document
+    boutons_par_document = {}
+
+    # Ajouter des boutons Check à côté de chaque document
     for document in corpus.id2doc.values():
         if type == "null" or type.lower() in document.url.lower():
-            zone_texte.insert(tk.END, f"Titre du document: {document.titre}\n")
-            zone_texte.insert(tk.END, f"Auteurs du document: {document.auteur}\n")
-            zone_texte.insert(tk.END, f"Contenu du document:\n{document.texte}\n")
-            zone_texte.insert(tk.END, "=" * 150 + "\n")
+            zone_texte.insert(tk.END, f"Titre du document : {document.titre}\n", "gras")
+            zone_texte.insert(tk.END, f"Auteurs du document : {document.auteur}\n")
 
-    # Activer la modification de la zone de texte
+            # Ajouter un bouton Check
+            var = tk.IntVar()
+            bouton_check = tk.Checkbutton(zone_texte, text="Sélectionner", variable=var, font=("Helvetica", 10),
+                                        command=afficher_details_selectionnes)
+            bouton_check.document = document  # Stocker le document dans l'attribut du bouton
+            zone_texte.window_create(tk.END, window=bouton_check)
+            zone_texte.insert(tk.END, "\n")
+
+            # Ajouter le bouton au dictionnaire correspondant à son document
+            boutons_par_document[document] = var
+
+    # Stocker les variables des boutons dans une liste globale
+    global variables
+    variables = list(boutons_par_document.values())
+
+    # Désactiver la modification de la zone de texte
     zone_texte.config(state=tk.DISABLED)
-
 def configurer_barre_defilement(event):
     zone_texte.yview_scroll(-1 * (event.delta // 120), "units")
 
