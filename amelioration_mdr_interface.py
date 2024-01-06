@@ -26,7 +26,6 @@ for auteur, index in corpus.aut2id.items():
         liste_auteurs.append(auteur)
 
 liste_auteurs = sorted(liste_auteurs)
-print(liste_auteurs)
 
 #fonction qui permet d'avoir qu'un type de source selectionné
 def selection_unique(index):
