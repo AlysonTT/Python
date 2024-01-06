@@ -125,8 +125,9 @@ def effectuer_recherche():
                 zone_texte.insert(tk.END, f"Résultat {i + 1} :\n", "gras")
                 zone_texte.insert(tk.END, f"Titre du document : {document.titre}\n", )
                 zone_texte.insert(tk.END, f"Auteurs du document: {''.join(document.auteur)}\n")
-                #si le doc est vide ne pas écrire
-                zone_texte.insert(tk.END, f"Contenu du document :\n{document.texte}\n")
+                if document.texte  != "":
+                    #si le doc est vide ne pas écrire
+                    zone_texte.insert(tk.END, f"Contenu du document :\n{document.texte}\n")
                 
                 # Mettre en rouge les mots-clés dans le texte du document
                 for mot in mots_clefs:
@@ -199,7 +200,9 @@ def afficher_corpus():
             zone_texte.insert(tk.END, f"Titre du document: {document.titre}\n")
             zone_texte.insert(tk.END, f"Auteurs du document: {''.join(document.auteur)}\n")
             zone_texte.insert(tk.END, f"Type du document: {document.url}\n")
-            zone_texte.insert(tk.END, f"Contenu du document:\n{document.texte}\n")
+            if document.texte  != "":
+                #si le doc est vide ne pas écrire
+                zone_texte.insert(tk.END, f"Contenu du document :\n{document.texte}\n")
             zone_texte.insert(tk.END, "=" * 150 + "\n")
 
 
