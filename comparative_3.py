@@ -128,7 +128,7 @@ def afficher_details_selectionnes(corpus, checkbutton_vars_afficher, zone_texte)
     zone_texte.config(state=tk.DISABLED)
 
 
-def afficher_corpus(corpus, checkbutton_vars_afficher, checkbutton_vars_comparer, zone_texte):
+def afficher_corpus(corpus, checkbutton_vars_afficher, zone_texte):
     selected_source_type = selected_source.get()
     print(selected_source_type)
 
@@ -156,8 +156,8 @@ def afficher_corpus(corpus, checkbutton_vars_afficher, checkbutton_vars_comparer
             var_comparer = tk.IntVar()
             bouton_comparer_doc = tk.Checkbutton(
             zone_texte,
-            text="Comparer", variable=var_comparer, font=("Helvetica", 10),
-            command=lambda doc=document, var=var_comparer: comparer_documents(corpus, checkbutton_vars_comparer, zone_texte))
+            text="Comparer", font=("Helvetica", 10),
+            command=lambda doc=document var: comparer_documents(corpus, var_comparer, zone_texte))
 
             bouton_comparer_doc.document = document
             zone_texte.window_create(tk.END, window=bouton_comparer_doc)
@@ -174,59 +174,23 @@ def afficher_corpus(corpus, checkbutton_vars_afficher, checkbutton_vars_comparer
 
     zone_texte.config(state=tk.DISABLED)
 
-'''
-def comparer_documents(corpus, checkbutton_vars_comparer, zone_texte):
-    documents_selectionnes = [document for document, var in zip(corpus.id2doc.values(), checkbutton_vars_comparer) if var.get()]
 
-    print("Documents sélectionnés :", documents_selectionnes)
+def comparer_documents(corpus, var_comparer, zone_texte):
+    # Compteur pour les cases à cocher "Comparer" cochées
+    comparer_checked_count = sum(var.get() for var in checkbutton_vars_afficher)
 
-    if len(documents_selectionnes) != 2:
-        messagebox.showwarning("Erreur", "Veuillez sélectionner exactement deux documents à comparer.")
-        return
+    if comparer_checked_count == 2:
+        # Deux cases à cocher "Comparer" ont été cochées, procédez à la comparaison
+        print("Deux cases à cocher 'Comparer' ont été cochées.")
+        document = var_comparer.document
 
-    document1, document2 = documents_selectionnes
+        print(f"Comparaison pour {document.titre}")
 
-    print(f"Comparaison entre {document1.titre} et {document2.titre}")  # Débogage
-
-
-    # Utiliser la méthode creer_vocabulaire pour obtenir le vocabulaire
-    _, _, vocabulaire_corpus, _, _, _ = corpus.creer_vocabulaire()
-
-    # Transformer les documents en vecteurs sur le vocabulaire précédemment construit
-    vectorizer = CountVectorizer(vocabulary=vocabulaire_corpus)
-    document1_vecteur = vectorizer.transform([document1.texte])
-    document2_vecteur = vectorizer.transform([document2.texte])
-
-    # Calculer la similarité entre les deux documents
-    similarite = cosine_similarity(document1_vecteur, document2_vecteur).flatten()[0]
-
-    # Afficher la similarité
-    zone_texte.config(state=tk.NORMAL)
-    zone_texte.insert(tk.END, f"Similarité entre {document1.titre} et {document2.titre} : {similarite}\n")
-    zone_texte.insert(tk.END, "=" * 150 + "\n")
-    zone_texte.config(state=tk.DISABLED)
-'''
-def comparer_documents(corpus, checkbutton_vars_comparer, zone_texte):
-    documents_selectionnes = [document for document, var in zip(corpus.id2doc.values(), checkbutton_vars_comparer) if var.get()]
-
-    zone_texte.config(state=tk.NORMAL)  # Permet d'éditer la zone de texte
-
-    print("Documents sélectionnés pour comparaison :", documents_selectionnes)  # Débogage
-
-    if len(documents_selectionnes) == 2:
-        
-        document1 = documents_selectionnes[0]
-        document2 = documents_selectionnes[1]
-        zone_texte.delete(1.0, tk.END)
-        zone_texte.insert(tk.END, f"Comparaison entre {document1.titre} et {document2.titre}\n")
-
-        zone_texte.insert(tk.END, "=" * 150 + "\n")  # Exemple : lignes de séparation
-    elif len(documents_selectionnes) < 2:
-        messagebox.showwarning("Erreur", "Veuillez sélectionner exactement deux documents à comparer.")
+        # Reste du code pour la comparaison
     else:
-        messagebox.showwarning("Erreur", "Vous avez sélectionné plus de deux documents. Veuillez en choisir seulement deux.")
+        # Si le nombre de cases à cocher "Comparer" cochées n'est pas égal à 2, affichez un avertissement
+        messagebox.showwarning("Erreur", "Veuillez sélectionner exactement deux documents à comparer.")
 
-    zone_texte.config(state=tk.DISABLED)  # Désactive la possibilité d'éditer la zone de texte
 
 def configurer_barre_defilement(event, zone_texte):
     zone_texte.yview_scroll(-1 * (event.delta // 120), "units")
