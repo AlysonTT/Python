@@ -1,7 +1,8 @@
 import tkinter as tk
-from tkinter import Text, Scrollbar, Entry, Button, Label
+from tkinter import Text, Scrollbar, Entry, Button, Label, messagebox
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+import matplotlib.pyplot as plt
 import pickle
 
 # Vérification de l'importation du module Corpus
@@ -223,9 +224,46 @@ def afficher_corpus():
     # Activer la modification de la zone de texte
     zone_texte.config(state=tk.DISABLED)
 
-
 def configurer_barre_defilement(event):
     zone_texte.yview_scroll(-1 * (event.delta // 120), "units")
+
+# Fonction pour traiter la date et générer la frise temporelle
+def generer_frise_temporelle():
+    mot_recherche = entry_mot_temporel.get()
+
+    # Vérifier qu'il y a un seul mot
+    mots = mot_recherche.strip().split()
+    if len(mots) == 1:
+        print("L'utilisateur a bien entré un seul mot :", mot_recherche)
+
+        # On va recuperer les donnees temporelle du mot entrez par l'utilisateur
+        informations_temporelles = corpus.extraire_informations_temporelles(mot_recherche)
+            
+        if informations_temporelles:
+            plt.figure(figsize=(10, 6))
+            # Graphique avec une ligne continue
+            plt.plot(list(informations_temporelles.keys()), list(informations_temporelles.values()), label=f'Évolution de "{mot_recherche}" dans le temps', linestyle='-')
+                    
+            # Choisissez un nombre fixe d'axes des x
+            num_axes_x = 6
+            num_points = len(informations_temporelles)
+            step = max(1, num_points // num_axes_x)
+
+            # Définir les étiquettes de l'axe x
+            x_labels = list(informations_temporelles.keys())[::step]
+            plt.xticks(x_labels)
+
+            plt.xlabel('Période')
+            plt.ylabel('Fréquence du Mot')
+            plt.title(f'Évolution temporelle du mot "{mot_recherche}" dans le corpus')
+
+            plt.show()
+
+    else:
+        messagebox.showerror("Erreur", "Veuillez entrer un seul mot.")
+
+        print("Veuillez entrer un seul mot.")
+
 
 # Créer une nouvelle fenêtre Tkinter
 fenetre = tk.Tk()
@@ -310,6 +348,20 @@ barre_defilement.pack(side=tk.RIGHT, fill=tk.Y)
 
 # Configurer la zone de texte pour utiliser la barre de défilement
 zone_texte.config(yscrollcommand=barre_defilement.set)
+
+# Créer un champ de texte (Entry) pour le mot ou on veut avoir sa frise temporelle
+entry_mot_temporel = Entry(fenetre, width=40)
+entry_mot_temporel.pack(pady=10)
+
+#Créer un cadre pour les boutons
+cadre_temporel = tk.Frame(fenetre)
+cadre_temporel.pack()
+
+# Créer un bouton pour effectuer la recherche
+bouton_temporel = Button(cadre_temporel, text="Générer Frise Temporelle", command=generer_frise_temporelle)
+bouton_temporel.pack(side=tk.LEFT, padx=5)
+
+
 
 # Configurer la barre de défilement pour répondre à la molette de la souris
 zone_texte.bind("<MouseWheel>", configurer_barre_defilement)
