@@ -14,12 +14,26 @@ except ImportError:
 with open("corpus.pkl", "rb") as f:
     corpus = pickle.load(f)
 
+# Liste des auteurs utilisés pour le afficher dans la fenetre
+liste_auteurs = []
+# Ajouter chaque auteur à la liste (en traitant les clés avec plusieurs noms)
+for auteur, index in corpus.aut2id.items():
+    # Vérifier si la clé contient plusieurs noms
+    if ',' in auteur:
+        noms_separes = [nom.strip() for nom in auteur.split(',')]
+        liste_auteurs.extend(noms_separes)
+    else:
+        liste_auteurs.append(auteur)
+
+liste_auteurs = sorted(liste_auteurs)
+
 #fonction qui permet d'avoir qu'un type de source selectionné
 def selection_unique(index):
     for i, var in enumerate(variables):
         if i != index:
             var.set(0)
 
+#fonction pour savoir quel type est sélectionné
 def checkbutton_selection():
     # Afficher les éléments sélectionnés
     options_selectionnees = [source[i] for i, var in enumerate(variables) if var.get()]
@@ -28,11 +42,22 @@ def checkbutton_selection():
     else:
         return "null"
 
+#fonction pour savoir quel auteurs ont été sélectionné
+def auteurs_selection():
+    auteurs_selectionnes = [listebox_auteurs.get(i) for i in listebox_auteurs.curselection()]
+    if auteurs_selectionnes:
+        return ", ".join(auteurs_selectionnes)
+    else:
+        return "null"
 
+#fonction pour effectuer une recherche avec des mots-clés
+#un type de source ou des auteurs spécifiés ou non  
 def effectuer_recherche():
-    #Recuperer le type de source
+    #Recuperer le type de source selectionne
     type = checkbutton_selection()
-    print(type)
+
+    #Recuperer les auteurs selectionnes
+    auteurs = auteurs_selection() 
 
     # Etape 1 : obtenir les mots-clefs à partir du champ de texte
     mots_clefs = entry_mots_clefs.get().split()
@@ -49,6 +74,9 @@ def effectuer_recherche():
     corpus_vecteur = vectorizer.transform(corpus_texte)
     similarite = cosine_similarity(corpus_vecteur, mots_clefs_vecteur).flatten()
 
+    #liste des auteurs selectionne
+    liste_auteurs_choisi = auteurs.split(',')
+
     # Afficher les documents qui contiennent au moins un mot-clé avec le score de similarité
     documents_retrouves = []
     for document, score_document in zip(corpus.id2doc.values(), similarite):
@@ -56,14 +84,28 @@ def effectuer_recherche():
         mots_trouves_titre = all(mot.lower() in document.titre.lower() for mot in mots_clefs)
         #any pour au moins un des mots clé all pour tous
 
+        type_auteur = False
+        #lise des auteurs du document
+        liste_auteurs_doc = document.auteur.split(',')
+        
+        # Supprimer les espaces avant et après chaque nom dans les deux listes
+        liste_auteurs_choisi = [auteur.strip() for auteur in liste_auteurs_choisi]
+        liste_auteurs_doc = [auteur.strip() for auteur in liste_auteurs_doc]
+
+        #on regarde si un des auteurs a écrit le document
+        for auteur in liste_auteurs_doc:
+            if auteur in liste_auteurs_choisi:
+                type_auteur = True
+                break
+        
+        if auteurs == "null":
+            type_auteur = True
+
         # On cherche les mots clés dans le texte ou dans le titre du document
         if mots_trouves_texte or mots_trouves_titre:           
             if document not in documents_retrouves:
-                if type == "null" or type.lower() in document.url.lower():
+                if type_auteur==True and type == "null" or type.lower() in document.url.lower():
                     documents_retrouves.append((document, score_document))
-                    print("Document trouvé (texte):", document.titre)
-                    print("Score:", score_document)
-                    print("Nombre de documents trouvés:", len(documents_retrouves))
 
     # Trier les résultats par score de similarité
     documents_retrouves.sort(key=lambda x: x[1], reverse=True)
@@ -84,9 +126,10 @@ def effectuer_recherche():
 
                 zone_texte.insert(tk.END, f"Résultat {i + 1} :\n", "gras")
                 zone_texte.insert(tk.END, f"Titre du document : {document.titre}\n", )
-                
-                #si le doc est vide ne pas écrire
-                zone_texte.insert(tk.END, f"Contenu du document :\n{document.texte}\n")
+                zone_texte.insert(tk.END, f"Auteurs du document: {''.join(document.auteur)}\n")
+                if document.texte  != "":
+                    #si le doc est vide ne pas écrire
+                    zone_texte.insert(tk.END, f"Contenu du document :\n{document.texte}\n")
                 
                 # Mettre en rouge les mots-clés dans le texte du document
                 for mot in mots_clefs:
@@ -96,6 +139,16 @@ def effectuer_recherche():
                         if start_index:
                             end_index = f"{start_index}+{len(mot)}c"
                             zone_texte.tag_add("rouge", start_index, end_index)
+                            start_index = end_index
+                
+                # Mettre en bleu les auteurs selectionnés
+                for auteur in liste_auteurs_choisi:
+                    start_index = "1.0"
+                    while start_index:
+                        start_index = zone_texte.search(auteur, start_index, tk.END, nocase=True)
+                        if start_index:
+                            end_index = f"{start_index}+{len(auteur)}c"
+                            zone_texte.tag_add("bleu", start_index, end_index)
                             start_index = end_index
 
                 zone_texte.insert(tk.END, f"Score de similarité: {score_document}\n")
@@ -110,22 +163,64 @@ def effectuer_recherche():
 def afficher_corpus():
     #Recuperer le type de source
     type = checkbutton_selection()
-    print(type)
+
+    #Recuperer les auteurs
+    auteurs = auteurs_selection()
 
     # Effacer le contenu précédent du widget de texte
     zone_texte.config(state=tk.NORMAL)
     zone_texte.delete(1.0, tk.END)
 
-    # Afficher l'ensemble du corpus
+    #liste des auteurs selectionne
+    liste_auteurs_choisi = auteurs.split(',')
+
+    # Afficher l'ensemble du corpus    
     for document in corpus.id2doc.values():
-        if type == "null" or type.lower() in document.url.lower():
+        type_auteur = False
+        #lise des auteurs du document
+        liste_auteurs_doc = document.auteur.split(',')
+
+       # Supprimer les espaces avant et après chaque nom dans les deux listes
+        liste_auteurs_choisi = [auteur.strip() for auteur in liste_auteurs_choisi]
+        liste_auteurs_doc = [auteur.strip() for auteur in liste_auteurs_doc]
+
+        #on regarde si un des auteurs a écrit le document
+        for auteur in liste_auteurs_doc:
+            if auteur in liste_auteurs_choisi:
+                type_auteur = True
+                break
+
+        # Vérifiez également la condition de type
+        type_condition = type == "null" or type.lower() in document.url.lower()
+
+        #si aucun auteurs selectionné, on affiche tous les documents
+        if auteurs == "null":
+            type_auteur = True
+
+        # Vérifiez si la condition est satisfaite
+        if type_auteur and type_condition:
             zone_texte.insert(tk.END, f"Titre du document: {document.titre}\n")
-            zone_texte.insert(tk.END, f"Auteurs du document: {document.auteur}\n")
-            zone_texte.insert(tk.END, f"Contenu du document:\n{document.texte}\n")
+            zone_texte.insert(tk.END, f"Auteurs du document: {''.join(document.auteur)}\n")
+            zone_texte.insert(tk.END, f"Type du document: {document.url}\n")
+            if document.texte  != "":
+                #si le doc est vide ne pas écrire
+                zone_texte.insert(tk.END, f"Contenu du document :\n{document.texte}\n")
             zone_texte.insert(tk.END, "=" * 150 + "\n")
 
+
+        # Mettre en bleu les auteurs selectionnés
+        for auteur in liste_auteurs_choisi:
+            start_index = "1.0"
+            while start_index:
+                start_index = zone_texte.search(auteur, start_index, tk.END, nocase=True)
+                if start_index:
+                    end_index = f"{start_index}+{len(auteur)}c"
+                    zone_texte.tag_add("bleu", start_index, end_index)
+                    start_index = end_index
+    
     # Activer la modification de la zone de texte
     zone_texte.config(state=tk.DISABLED)
+
 
 def configurer_barre_defilement(event):
     zone_texte.yview_scroll(-1 * (event.delta // 120), "units")
@@ -185,6 +280,20 @@ for i, option in enumerate(source):
     checkbutton = tk.Checkbutton(cadre_boutons, text=option, variable=variables[i], command=lambda i=i: selection_unique(i))
     checkbutton.pack(side=tk.LEFT, padx=5)
 
+#Espace pour sélectionner un ou plusieurs auteurs
+# Listebox pour afficher la liste des auteurs
+listebox_auteurs = tk.Listbox(cadre_boutons, selectmode=tk.MULTIPLE, height=5, width=30)
+for auteur in liste_auteurs:
+    listebox_auteurs.insert(tk.END, auteur)
+listebox_auteurs.pack(side=tk.LEFT, padx=5, pady=10)
+
+# Barre de défilement pour la Listebox
+scrollbar_auteurs = tk.Scrollbar(cadre_boutons, orient=tk.VERTICAL, command=listebox_auteurs.yview)
+scrollbar_auteurs.pack(side=tk.RIGHT, fill=tk.Y)
+
+# Associer la barre de défilement à la Listebox
+listebox_auteurs.config(yscrollcommand=scrollbar_auteurs.set)
+
 # Créer un cadre (Frame) pour contenir la zone de texte et la barre de défilement
 cadre_texte = tk.Frame(fenetre)
 cadre_texte.pack(expand=True, fill='both')
@@ -206,10 +315,11 @@ zone_texte.bind("<MouseWheel>", configurer_barre_defilement)
 # Configurer le style de texte pour la couleur rouge
 zone_texte.tag_configure("rouge", foreground="red")
 
+# Configurer le style de texte pour la couleur bleu
+zone_texte.tag_configure("bleu", foreground="blue")
+
 # Créer un style de texte pour le texte en gras
 zone_texte.tag_configure("gras", font=("Helvetica", 10, "bold"))
-
-
 
 # Démarrer la boucle principale Tkinter
 fenetre.mainloop()
