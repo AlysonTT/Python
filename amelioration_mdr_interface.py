@@ -15,17 +15,19 @@ with open("corpus.pkl", "rb") as f:
     corpus = pickle.load(f)
 
 # Liste des auteurs utilisés pour le afficher dans la fenetre
-liste_auteurs = []
-# Ajouter chaque auteur à la liste (en traitant les clés avec plusieurs noms)
+liste_auteurs = set()
+
+# Ajouter chaque auteur à l'ensemble (en traitant les clés avec plusieurs noms)
 for auteur, index in corpus.aut2id.items():
     # Vérifier si la clé contient plusieurs noms
     if ',' in auteur:
         noms_separes = [nom.strip() for nom in auteur.split(',')]
-        liste_auteurs.extend(noms_separes)
+        liste_auteurs.update(noms_separes)
     else:
-        liste_auteurs.append(auteur)
+        liste_auteurs.add(auteur)
 
-liste_auteurs = sorted(liste_auteurs)
+# Convertir l'ensemble en une liste triée
+liste_auteurs = sorted(list(liste_auteurs))
 
 #fonction qui permet d'avoir qu'un type de source selectionné
 def selection_unique(index):
