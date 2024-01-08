@@ -1,3 +1,4 @@
+
 # Correction de G. Poux-Médard, 2021-2022
 
 from Classes import Author
@@ -186,3 +187,28 @@ class Corpus:
         vocab_mat_TF = {mot: {'id': info['id'], 'occurrences': somme_colonnes[info['id']], 'nb_doc': nombre_doc_contenant_mot[info['id']]} for mot, info in sorted(vocab.items())}
 
         return vocab, vocab_mat_TF, list(vocabulaire), freq, mat_TF, mat_TFxIDF
+    
+    def extraire_informations_temporelles(self, mot_recherche):
+        informations_temporelles = {}
+
+        for doc_info in self.id2doc.values():
+            #print("texte : ", doc_info.texte)
+            #print("date : ", doc_info.date)
+
+            contenu = doc_info.texte  # Récupérer le texte, ou une chaîne vide si la clé n'existe pas
+            date = doc_info.date  # Récupérer la date, ou None si la clé n'existe pas
+
+
+            # Vérifier si le mot recherché est présent dans le contenu du document
+            for mot in contenu.split():
+                if mot in mot_recherche:
+                    print("MOT ", mot_recherche)
+                    # Ajouter les informations à la période correspondante
+                    periode = date  # Format de la date
+                    #print("MOT RECHERCHER ", date)
+                    if periode not in informations_temporelles:
+                        #print("PERIODEEEE ", date)
+                        informations_temporelles[periode] = 0
+                    informations_temporelles[periode] += 1
+
+        return informations_temporelles
