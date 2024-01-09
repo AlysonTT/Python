@@ -217,20 +217,25 @@ def effectuer_recherche():
     
 
 def afficher_corpus():
+    # Etape 1 : Effacer le contenu précédent du widget de texte
+    zone_texte.config(state=tk.NORMAL)
+    zone_texte.delete(1.0, tk.END) 
+    
+    # Etape 2 : obtenir les différents éléments de recherche sélectionné par l'utilisateur à partir des différents éléments
     #Recuperer le type de source
     type = checkbutton_selection()
 
     #Recuperer les auteurs
     auteurs = auteurs_selection()
 
+    #liste des auteurs selectionne avec un autre format
+    liste_auteurs_choisi = auteurs.split(',')
+
     #Recuperer la date entrez
     date_entre = entry_date.get().strip()
-    # Effacer le contenu précédent du widget de texte
-    zone_texte.config(state=tk.NORMAL)
-    zone_texte.delete(1.0, tk.END)
+   
     # Vérifier qu'il y a une seule date
     date_lenght = date_entre.split()
-    print("date ",date_lenght)
 
     if len(date_lenght) == 1:
             #verifie le format
@@ -247,9 +252,6 @@ def afficher_corpus():
     elif len(date_lenght) > 1:
         # Afficher un message d'erreur si la date n'est pas dans le bon format
         messagebox.showerror("Erreur", "Veuillez entrer une date.")
-
-    #liste des auteurs selectionne
-    liste_auteurs_choisi = auteurs.split(',')
 
     # Afficher l'ensemble du corpus    
     for document in corpus.id2doc.values():
@@ -273,10 +275,9 @@ def afficher_corpus():
         #si aucun auteurs selectionné, on affiche tous les documents
         if auteurs == "null":
             type_auteur = True
-        print("avant le if")
+
         # Vérifiez si la condition est satisfaite
-        if type_auteur and type_condition and (date_entre == document.date or len(date_entre)==0):
-            print("DANS le if")
+        if type_auteur and type_condition and (document.date == date_entre or len(date_entre)==0):
             zone_texte.insert(tk.END, f"Titre du document: {document.titre}\n")
             zone_texte.insert(tk.END, f"Date du document : {document.date}\n")
             zone_texte.insert(tk.END, f"Auteurs du document: {''.join(document.auteur)}\n")
@@ -298,13 +299,14 @@ def afficher_corpus():
                     start_index = end_index
 
         # Mettre en vert la date écrite
-        start_index = "1.0"
-        while start_index:
-            start_index = zone_texte.search(date_entre, start_index, tk.END, nocase=True)
-            if start_index:
-                end_index = f"{start_index}+{len(date_entre)}c"
-                zone_texte.tag_add("vert", start_index, end_index)
-                start_index = end_index
+        if len(date_entre) != 0:
+            start_index = "1.0"
+            while start_index:
+                start_index = zone_texte.search(date_entre, start_index, tk.END, nocase=True)
+                if start_index:
+                    end_index = f"{start_index}+{len(date_entre)}c"
+                    zone_texte.tag_add("vert", start_index, end_index)
+                    start_index = end_index
     
     
     # Activer la modification de la zone de texte
