@@ -54,6 +54,14 @@ def auteurs_selection():
     else:
         return "null"
 
+#fonction pour deselectionner tous les auteurs quand on appuie sur un checkbutton
+def deselectionner_tous_les_auteurs():
+    # Désélectionne tous les éléments de la listebox
+    listebox_auteurs.selection_clear(0, tk.END)
+    # On met l'état du checkbutton en non coché
+    checkbutton_deselection.deselect()
+    
+    
 #fonction pour vérifier qu'une date est valide
 def est_date_valide(annee, mois, jour):
     # Vérification de l'année (entre 1900 et 2024)
@@ -173,8 +181,8 @@ def effectuer_recherche():
 
                 zone_texte.insert(tk.END, f"Résultat {i + 1} :\n", "gras")
                 zone_texte.insert(tk.END, f"Titre du document : {document.titre}\n")
-                zone_texte.insert(tk.END, f"Date du document : {document.date}\n")
                 zone_texte.insert(tk.END, f"Auteurs du document: {''.join(document.auteur)}\n")
+                zone_texte.insert(tk.END, f"Date du document : {document.date}\n")
                 if document.texte  != "":
                     #si le doc est vide ne pas écrire
                     zone_texte.insert(tk.END, f"Contenu du document :\n{document.texte}\n")
@@ -281,8 +289,8 @@ def afficher_corpus():
         # Vérifiez si la condition est satisfaite
         if type_auteur and type_condition and (document.date == date_entre or len(date_entre)==0):
             zone_texte.insert(tk.END, f"Titre du document: {document.titre}\n")
-            zone_texte.insert(tk.END, f"Date du document : {document.date}\n")
             zone_texte.insert(tk.END, f"Auteurs du document: {''.join(document.auteur)}\n")
+            zone_texte.insert(tk.END, f"Date du document : {document.date}\n")
             zone_texte.insert(tk.END, f"Type du document: {document.url}\n")
             if document.texte  != "":
                 #si le doc est vide ne pas écrire
@@ -427,6 +435,10 @@ listebox_auteurs = tk.Listbox(cadre_auteurs, selectmode=tk.MULTIPLE, height=5, w
 for auteur in liste_auteurs:
     listebox_auteurs.insert(tk.END, auteur)
 listebox_auteurs.grid(row=1, column=1, padx=5, pady=10, sticky="nsew")
+    
+# Checkbutton pour désélectionner tous les auteurs
+checkbutton_deselection = tk.Checkbutton(cadre_auteurs, text="Désélectionner tous les auteurs", command=deselectionner_tous_les_auteurs)
+checkbutton_deselection.grid(row=2, column=1, pady=5)
 
 # Barre de défilement pour la Listebox
 scrollbar_auteurs = tk.Scrollbar(cadre_auteurs, orient=tk.VERTICAL, command=listebox_auteurs.yview)
