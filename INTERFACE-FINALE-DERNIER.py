@@ -429,8 +429,7 @@ def afficher_corpus():
     zone_texte.config(state=tk.DISABLED)
     
 def comparer_documents(corpus, checkbutton_vars_comparer, zone_texte, numDoc):
-    # Récupérer le document par son identifiant unique
-    document = next(doc for doc in corpus.id2doc.values() if doc.numDoc == numDoc)
+    
 
     # Récupérer les documents sélectionnés en utilisant l'identifiant unique
     numeros_selectionnes = [doc for doc, var in checkbutton_vars_comparer.items() if var.get()]
@@ -439,7 +438,7 @@ def comparer_documents(corpus, checkbutton_vars_comparer, zone_texte, numDoc):
 
     print("Documents sélectionnés pour comparaison :", numeros_selectionnes)  # Débogage
     print("longueur :" ,len(numeros_selectionnes))
-
+    print("longeur check ", len(checkbutton_vars_comparer))
     if len(numeros_selectionnes) == 2:
         num_doc1 = numeros_selectionnes[0]
         num_doc2 = numeros_selectionnes[1]
@@ -496,11 +495,15 @@ def comparer_documents(corpus, checkbutton_vars_comparer, zone_texte, numDoc):
             zone_texte.insert(tk.END, "Pourcentage de présence des mots communs :\n\n")
             for mot in mots_communs:
                 pour_document1 = document1.texte.lower().count(mot.lower())/total_mots_document1*100
-                pour_document2 = document2.texte.lower().count(mot.lower())/total_mots_document1*100
+                pour_document2 = document2.texte.lower().count(mot.lower())/total_mots_document2*100
                 zone_texte.insert(tk.END, f"- Mot : {mot}\n")
                 zone_texte.insert(tk.END, f"{document1.titre} : {pour_document1:.2f} %\n")
                 zone_texte.insert(tk.END, f"{document2.titre} : {pour_document2:.2f} %\n\n")
-            
+        
+        clear_tous_les_boutons(checkbutton_vars_afficher, checkbutton_vars_comparer)
+        # Réinitialiser les variables de comparaison
+        checkbutton_vars_comparer = {}
+        
         zone_texte.config(state=tk.DISABLED)
 
     elif len(numeros_selectionnes) < 2:
@@ -718,11 +721,11 @@ entry_date = Entry(cadre_date, width=20)
 entry_date.grid(row=1, column=2, pady=5)
 
 # Créer un bouton pour effectuer la recherche
-bouton_recherche = Button(cadre_boutons_options, text="Rechercher", command=clear_tous_les_boutons(checkbutton_vars_afficher, checkbutton_vars_comparer) or effectuer_recherche)
+bouton_recherche = Button(cadre_boutons_options, text="Rechercher", command=effectuer_recherche)
 bouton_recherche.grid(row=0, column=3, padx=5)
 
 # Créer un bouton pour afficher tout le corpus
-bouton_afficher_corpus = Button(cadre_boutons_options, text="Afficher Tout le Corpus", command=clear_tous_les_boutons(checkbutton_vars_afficher, checkbutton_vars_comparer) or afficher_corpus)
+bouton_afficher_corpus = Button(cadre_boutons_options, text="Afficher Tout le Corpus", command=afficher_corpus)
 bouton_afficher_corpus.grid(row=0, column=4, padx=5)
 
 # Ajoutez cette ligne dans la création du cadre_boutons
