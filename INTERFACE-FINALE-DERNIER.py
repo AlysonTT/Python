@@ -1,10 +1,13 @@
 import tkinter as tk
 from tkinter import Text, Scrollbar, Entry, Button, Label, messagebox
 from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-import matplotlib.pyplot as plt
-import re
 import pickle
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+import re
 
 # Vérification de l'importation du module Corpus
 try:
@@ -18,6 +21,12 @@ with open("corpus.pkl", "rb") as f:
 
 # Liste des auteurs utilisés pour le afficher dans la fenetre
 liste_auteurs = set()
+
+# Variables pour stocker l'état des Checkbuttons "Afficher"
+checkbutton_vars_afficher = {}
+
+# Variables pour stocker l'état des Checkbuttons "Comparer"
+checkbutton_vars_comparer = {}
 
 # Ajouter chaque auteur à l'ensemble (en traitant les clés avec plusieurs noms)
 for auteur, index in corpus.aut2id.items():
@@ -169,6 +178,10 @@ def effectuer_recherche():
     zone_texte.config(state=tk.NORMAL)
     zone_texte.delete(1.0, tk.END)
 
+    '''AJOUTER'''
+    boutons_par_document = {}
+    '''AJOUTER'''
+
     # Afficher les trois meilleurs résultats (avec score non nul)
     if not documents_retrouves:
         zone_texte.insert(tk.END, "Aucun résultat trouvé dans le corpus.")
@@ -218,19 +231,80 @@ def effectuer_recherche():
                             start_index = end_index
 
                 zone_texte.insert(tk.END, f"Score de similarité: {score_document}\n")
+                
+                '''AJOUTER'''
+                var_afficher = tk.IntVar()
+                bouton_check = tk.Checkbutton(
+                    zone_texte, text="Afficher", variable=var_afficher, font=("Helvetica", 10),
+                    command=lambda doc=document, var=var_afficher: afficher_details_selectionnes(corpus, checkbutton_vars_afficher, zone_texte, doc.numDoc))
+                bouton_check.document = document
+                zone_texte.window_create(tk.END, window=bouton_check)
+                zone_texte.insert(tk.END, "\n")
+                
+
+                var_comparer = tk.IntVar()
+                bouton_comparer_doc = tk.Checkbutton(
+                    zone_texte,
+                    text="Comparer", variable=var_comparer, font=("Helvetica", 10),
+                    command=lambda doc=document, var=var_comparer: comparer_documents(corpus, checkbutton_vars_comparer, zone_texte, doc.numDoc))
+                bouton_comparer_doc.document = document
+                zone_texte.window_create(tk.END, window=bouton_comparer_doc)
+                zone_texte.insert(tk.END, "\n")
+                '''AJOUTER'''
+                
                 zone_texte.insert(tk.END, "=" * 150 + "\n")
                 meilleur_resultat_affiche += 1
             #else:zone_texte.insert(tk.END, "Aucun résultat trouvé dans le corpus.")
-    
+
+                '''AJOUTER'''
+                boutons_par_document[document] = (var_afficher, var_comparer)
+                '''AJOUTER'''
+        '''AJOUTER'''
+        checkbutton_vars_afficher.update({doc.numDoc: var_afficher for doc, (var_afficher, _) in boutons_par_document.items()})
+        checkbutton_vars_comparer.update({doc.numDoc: var_comparer for doc, (_, var_comparer) in boutons_par_document.items()})
+        '''AJOUTER'''
+
         # Désactiver la modification de la zone de texte
         zone_texte.config(state=tk.DISABLED)
 
+'''AJOUTER'''
+def afficher_details_selectionnes(corpus, checkbutton_vars_afficher, zone_texte, numDoc):
+    document = next(doc for doc in corpus.id2doc.values() if doc.numDoc == numDoc)
+
+
+    zone_texte.config(state=tk.NORMAL)
+    zone_texte.delete(1.0, tk.END)
+
+    # Récupérer les documents sélectionnés
+    documents_selectionnes = [document for document, var in zip(corpus.id2doc.values(), checkbutton_vars_afficher.values()) if var.get()]
+
+    # Afficher les détails des documents sélectionnés
+    for document in documents_selectionnes:
+        zone_texte.insert(tk.END, f"Titre du document : {document.titre}\n", "gras")
+        zone_texte.insert(tk.END, f"Auteur du document : {document.auteur}\n")
+        zone_texte.insert(tk.END, f"URL du document : {document.url}\n")
+        zone_texte.insert(tk.END, f"Contenu du document :\n{document.texte}\n")
+        zone_texte.insert(tk.END, "=" * 150 + "\n")
+
+    # Désactiver la modification de la zone de texte
+    zone_texte.config(state=tk.DISABLED)
+'''AJOUTER'''
 
 def afficher_corpus():
     # Etape 1 : Effacer le contenu précédent du widget de texte
     zone_texte.config(state=tk.NORMAL)
     zone_texte.delete(1.0, tk.END) 
     
+    '''AJOUTER'''
+    
+    boutons_par_document = {}
+
+    # Débogage
+    print("Valeurs de checkbutton_vars_afficher avant la boucle for :", [var.get() for var in checkbutton_vars_afficher.values()])
+    print("Valeurs de checkbutton_vars_comparer avant la boucle for :", [var.get() for var in checkbutton_vars_comparer.values()])
+
+    '''AJOUTER'''
+
     # Etape 2 : obtenir les différents éléments de recherche sélectionné par l'utilisateur à partir des différents éléments
     #Recuperer le type de source
     type = checkbutton_selection()
@@ -282,6 +356,32 @@ def afficher_corpus():
         # Vérifiez également la condition de type
         type_condition = type == "null" or type.lower() in document.url.lower()
 
+        ''''AJOUTER'''
+
+        zone_texte.insert(tk.END, f"Titre du document : {document.titre}\n", "gras")
+        zone_texte.insert(tk.END, f"Auteurs du document : {document.auteur}\n")
+
+        var_afficher = tk.IntVar()
+        bouton_check = tk.Checkbutton(
+            zone_texte, text="Afficher", variable=var_afficher, font=("Helvetica", 10),
+            command=lambda doc=document, var=var_afficher: afficher_details_selectionnes(corpus, checkbutton_vars_afficher, zone_texte, doc.numDoc))
+        bouton_check.document = document
+        zone_texte.window_create(tk.END, window=bouton_check)
+        zone_texte.insert(tk.END, "\n")
+
+        var_comparer = tk.IntVar()
+        bouton_comparer_doc = tk.Checkbutton(
+                zone_texte,
+                text="Comparer", variable=var_comparer, font=("Helvetica", 10),
+                command=lambda doc=document, var=var_comparer: comparer_documents(corpus, checkbutton_vars_comparer, zone_texte, doc.numDoc))
+
+        bouton_comparer_doc.document = document
+        zone_texte.window_create(tk.END, window=bouton_comparer_doc)
+        zone_texte.insert(tk.END, "\n")
+
+        boutons_par_document[document] = (var_afficher, var_comparer)
+        '''AJOUTER'''
+
         #si aucun auteurs selectionnés, on affiche tous les documents
         if auteurs == "null":
             type_auteur = True
@@ -318,47 +418,165 @@ def afficher_corpus():
                     zone_texte.tag_add("vert", start_index, end_index)
                     start_index = end_index
     
+    '''AJOUTER'''
+    checkbutton_vars_afficher.update({doc.numDoc: var_afficher for doc, (var_afficher, _) in boutons_par_document.items()})
+    checkbutton_vars_comparer.update({doc.numDoc: var_comparer for doc, (_, var_comparer) in boutons_par_document.items()})
+    checkbutton_vars_afficher.update({doc.numDoc: var_afficher for doc, (var_afficher, _) in boutons_par_document.items()})
+    checkbutton_vars_comparer.update({doc.numDoc: var_comparer for doc, (_, var_comparer) in boutons_par_document.items()})
+    '''AJOUTER'''
+
     # Activer la modification de la zone de texte
     zone_texte.config(state=tk.DISABLED)
     
+def comparer_documents(corpus, checkbutton_vars_comparer, zone_texte, numDoc):
+    # Récupérer le document par son identifiant unique
+    document = next(doc for doc in corpus.id2doc.values() if doc.numDoc == numDoc)
+
+    # Récupérer les documents sélectionnés en utilisant l'identifiant unique
+    numeros_selectionnes = [doc for doc, var in checkbutton_vars_comparer.items() if var.get()]
+
+    zone_texte.config(state=tk.NORMAL)  # Permet d'éditer la zone de texte
+
+    print("Documents sélectionnés pour comparaison :", numeros_selectionnes)  # Débogage
+    print("longueur :" ,len(numeros_selectionnes))
+
+    if len(numeros_selectionnes) == 2:
+        num_doc1 = numeros_selectionnes[0]
+        num_doc2 = numeros_selectionnes[1]
+
+        # Récupérer les documents correspondants aux numéros
+        document1 = next(doc for doc in corpus.id2doc.values() if doc.numDoc == num_doc1)
+        document2 = next(doc for doc in corpus.id2doc.values() if doc.numDoc == num_doc2)
+
+
+        # Utiliser la méthode creer_vocabulaire pour obtenir le vocabulaire
+        _, _, vocabulaire_corpus, _, _, _ = corpus.creer_vocabulaire()
+
+        # Transformer les documents en vecteurs sur le vocabulaire précédemment construit
+        vectorizer = CountVectorizer(vocabulary=vocabulaire_corpus)
+        document1_vecteur = vectorizer.transform([document1.texte])
+        document2_vecteur = vectorizer.transform([document2.texte])
+
+        # Calculer la similarité entre les deux documents
+        similarite = cosine_similarity(document1_vecteur, document2_vecteur).flatten()[0]
+
+        # Récupérer les indices des mots communs
+        mots_communs_indices = list(set(document1_vecteur.indices) & set(document2_vecteur.indices))
+
+        # Récupérer les mots communs
+        mots_communs = [vocabulaire_corpus[indice] for indice in mots_communs_indices]
+
+        # Calculer le nombre total de mots dans chaque document
+        total_mots_document1 = len(document1.texte.split())
+        total_mots_document2 = len(document2.texte.split())
+
+        # Afficher la similarité
+        zone_texte.config(state=tk.NORMAL)
+        zone_texte.delete(1.0, tk.END)
+        zone_texte.insert(tk.END, f"Comparaison entre {document1.titre} et {document2.titre}\n\n")
+        zone_texte.insert(tk.END, f"Similarité : {similarite}\n\n")
+        
+
+        zone_texte.insert(tk.END, f"Informations pour le premier document : \n\n")
+        zone_texte.insert(tk.END, f"Titre : {document1.titre}\n")
+        zone_texte.insert(tk.END, f"Auteurs : {document1.auteur}\n")
+        zone_texte.insert(tk.END, f"URL : {document1.url}\n")
+        zone_texte.insert(tk.END, f"Contenu :\n{document1.texte}\n\n")
+
+        zone_texte.insert(tk.END, f"Informations pour le second document :\n\n")
+        zone_texte.insert(tk.END, f"Titre : {document2.titre}\n")
+        zone_texte.insert(tk.END, f"Auteurs : {document2.auteur}\n")
+        zone_texte.insert(tk.END, f"URL : {document2.url}\n")
+        zone_texte.insert(tk.END, f"Contenu :\n{document2.texte}\n\n")
+        
+        if not mots_communs:
+            zone_texte.insert(tk.END, "Aucun mot commun trouvé.\n")
+        else:
+            # Afficher les mots communs dans la zone de texte
+            zone_texte.insert(tk.END, "Pourcentage de présence des mots communs :\n\n")
+            for mot in mots_communs:
+                pour_document1 = document1.texte.lower().count(mot.lower())/total_mots_document1*100
+                pour_document2 = document2.texte.lower().count(mot.lower())/total_mots_document1*100
+                zone_texte.insert(tk.END, f"- Mot : {mot}\n")
+                zone_texte.insert(tk.END, f"{document1.titre} : {pour_document1:.2f} %\n")
+                zone_texte.insert(tk.END, f"{document2.titre} : {pour_document2:.2f} %\n\n")
+            
+        zone_texte.config(state=tk.DISABLED)
+
+    elif len(numeros_selectionnes) < 2:
+        messagebox.showwarning("Erreur", "Veuillez sélectionner exactement deux documents à comparer.")
+    else:
+        messagebox.showwarning("Erreur", "Vous avez sélectionné plus de deux documents. Veuillez en choisir seulement deux.")
+
+    zone_texte.config(state=tk.DISABLED)  # Désactive la possibilité d'éditer la zone de texte
+
+
+def clear_tous_les_boutons(checkbutton_vars_afficher, checkbutton_vars_comparer):
+    for var_afficher in checkbutton_vars_afficher.values():
+        var_afficher.set(0)
+
+    for var_comparer in checkbutton_vars_comparer.values():
+        var_comparer.set(0)
+
+
+
 
 def configurer_barre_defilement(event):
     zone_texte.yview_scroll(-1 * (event.delta // 120), "units")
 
-'''
-# Fonction pour traiter la date et générer la frise temporelle
-def generer_frise_temporelle():
-    mot_recherche = entry_mot_temporel.get()
+def mesure_corpus(corpus, zone_texte):
+    zone_texte.config(state=tk.NORMAL)
 
-    # Vérifier qu'il y a un seul mot
-    mots = mot_recherche.strip().split()
-    if len(mots) == 1:
-        # On va recuperer les donnees temporelle du mot entrez par l'utilisateur
-        informations_temporelles = corpus.extraire_informations_temporelles(mot_recherche)
-            
-        if informations_temporelles:
-            plt.figure(figsize=(10, 6))
-            # Graphique avec une ligne continue
-            plt.plot(list(informations_temporelles.keys()), list(informations_temporelles.values()), label=f'Évolution de "{mot_recherche}" dans le temps', linestyle='-')
-                    
-            # Choisissez un nombre fixe d'axes des x
-            num_axes_x = 6
-            num_points = len(informations_temporelles)
-            step = max(1, num_points // num_axes_x)
+    # Utiliser la matrice TF-IDF du corpus pour la transformation
+    _, _, vocabulaire_corpus, _, _, mat_TFxIDF_corpus = corpus.creer_vocabulaire()
 
-            # Définir les étiquettes de l'axe x
-            x_labels = list(informations_temporelles.keys())[::step]
-            plt.xticks(x_labels)
+    # Trier le vocabulaire une fois
+    vocabulaire_corpus_trie = sorted(vocabulaire_corpus, key=lambda mot: (not mot.isdigit(), int(mot) if mot.isdigit() else mot.lower()))
 
-            plt.xlabel('Période')
-            plt.ylabel('Fréquence du Mot')
-            plt.title(f'Évolution temporelle du mot "{mot_recherche}" dans le corpus')
+    # Transformer les documents en vecteurs TF-IDF (utiliser un sous-ensemble de documents si nécessaire)
+    corpus_texte_nettoye = [corpus.nettoyer_texte(doc.texte) for doc in list(corpus.id2doc.values())[:100]]  # Limiter à 100 documents
+    vectorizer = TfidfVectorizer(vocabulary=vocabulaire_corpus_trie, use_idf=False)
+    corpus_vecteur = vectorizer.fit_transform(corpus_texte_nettoye)
 
-            plt.show()
+    zone_texte.config(state=tk.NORMAL)
+    zone_texte.delete(1.0, tk.END)
 
-    else:
-        messagebox.showerror("Erreur", "Veuillez entrer un seul mot.")
-'''
+    # Afficher la mesure TDxIDF pour chaque mot du corpus dans la zone de texte
+    zone_texte.insert(tk.END, "Mesure TDxIDF pour chaque mot du corpus :\n\n")
+    for mot, indice in zip(vocabulaire_corpus_trie, range(len(vocabulaire_corpus_trie))):
+        tfidf_corpus = mat_TFxIDF_corpus[:, indice].tolist()
+        
+        # Ajouter le mot au texte (en bleu et souligné)
+        zone_texte.tag_configure(f"bleu_souligne_{indice}", foreground="blue", underline=True)
+        zone_texte.insert(tk.END, f"Mot : {mot}\n", "gras")
+
+        # Ajouter le mot au texte (en lien pour la visualisation)
+        zone_texte.tag_configure(f"visualisation_mot_{indice}", foreground="blue", underline=True)
+        zone_texte.insert(tk.END, "Visualiser la distribution\n", f"visualisation_mot_{indice}")
+        zone_texte.tag_bind(f"visualisation_mot_{indice}", "<Button-1>", lambda event, mot=mot: visualiser_distribution(mot, vocabulaire_corpus_trie, mat_TFxIDF_corpus))
+
+        zone_texte.insert(tk.END, f"Corpus - TDxIDF : {tfidf_corpus}\n\n")
+
+    zone_texte.config(state=tk.DISABLED)
+
+def visualiser_distribution(mot, vocabulaire, mat_TFxIDF):
+    # Trouver l'indice du mot dans le vocabulaire
+    mot_index = vocabulaire.index(mot)
+
+    # Initialiser la figure pour les graphiques
+    plt.figure(figsize=(12, 6))
+
+    tfidf_corpus = mat_TFxIDF[:, mot_index].tolist()
+
+    # Créer un histogramme pour le mot
+    plt.hist(np.array(tfidf_corpus), bins=30, edgecolor='black')
+    plt.title(f'Distribution TD-IDF pour le mot "{mot}"')
+    plt.xlabel('Valeurs TD-IDF')
+    plt.ylabel('Fréquence')
+
+    plt.tight_layout()
+    plt.show()
+
 
 def generer_frise_temporelle():
     mot_recherche = entry_mot_temporel.get()
@@ -500,12 +718,20 @@ entry_date = Entry(cadre_date, width=20)
 entry_date.grid(row=1, column=2, pady=5)
 
 # Créer un bouton pour effectuer la recherche
-bouton_recherche = Button(cadre_boutons_options, text="Rechercher", command=effectuer_recherche)
+bouton_recherche = Button(cadre_boutons_options, text="Rechercher", command=clear_tous_les_boutons(checkbutton_vars_afficher, checkbutton_vars_comparer) or effectuer_recherche)
 bouton_recherche.grid(row=0, column=3, padx=5)
 
 # Créer un bouton pour afficher tout le corpus
-bouton_afficher_corpus = Button(cadre_boutons_options, text="Afficher Tout le Corpus", command=afficher_corpus)
+bouton_afficher_corpus = Button(cadre_boutons_options, text="Afficher Tout le Corpus", command=clear_tous_les_boutons(checkbutton_vars_afficher, checkbutton_vars_comparer) or afficher_corpus)
 bouton_afficher_corpus.grid(row=0, column=4, padx=5)
+
+# Ajoutez cette ligne dans la création du cadre_boutons
+bouton_clear = Button(cadre_boutons_options, text="Clear", command=lambda: clear_tous_les_boutons(checkbutton_vars_afficher, checkbutton_vars_comparer))
+bouton_clear.grid(row=1, column=2, padx=5)
+
+bouton_mesure = Button(cadre_boutons_options, text="Mesure du corpus", command=lambda: mesure_corpus(corpus, zone_texte))
+bouton_mesure.grid(row=1, column=3, padx=5)
+
 
 # Créer un cadre (Frame) pour contenir la zone de texte et la barre de défilement
 cadre_texte = tk.Frame(fenetre)
