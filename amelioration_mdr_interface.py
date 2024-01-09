@@ -3,6 +3,7 @@ from tkinter import Text, Scrollbar, Entry, Button, Label, messagebox
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import matplotlib.pyplot as plt
+import re
 import pickle
 
 # Vérification de l'importation du module Corpus
@@ -53,17 +54,63 @@ def auteurs_selection():
     else:
         return "null"
 
+#fonction pour vérifier qu'une date est valide
+def est_date_valide(annee, mois, jour):
+    # Vérification de l'année (entre 1900 et 2024)
+    if not (1900 <= annee <= 2024):
+        return False
+
+    # Vérification du mois
+    if not (1 <= mois <= 12):
+        return False
+
+    # Vérification du jour en fonction du mois
+    jours_dans_le_mois = {
+        1: 31, 2: 29 if (annee % 4 == 0 and annee % 100 != 0) or (annee % 400 == 0) else 28,
+        3: 31, 4: 30, 5: 31, 6: 30, 7: 31, 8: 31, 9: 30, 10: 31, 11: 30, 12: 31
+    }
+
+    if not (1 <= jour <= jours_dans_le_mois[mois]):
+        return False
+
+    return True
+
 #fonction pour effectuer une recherche avec des mots-clés
 #un type de source ou des auteurs spécifiés ou non  
 def effectuer_recherche():
+    # Etape 1 : obtenir les différents éléments de recherche sélectionné par l'utilisateur à partir des différents éléments
+    #mots-cles entrez dans le champ texte
+    mots_clefs = entry_mots_clefs.get().split()
+    
+    #date entrez dans le champ texte
+    date_entre = entry_date.get().strip()
+
+    # Vérifier qu'il y a un seul mot
+    date_lenght = date_entre.split()
+    if len(date_lenght) == 1:
+            #verifie le format
+            date_regex = re.compile(r'^(\d{4})/(\d{2})/(\d{2})$')
+            date =date_regex.match(date_entre)
+            if date:
+                annee, mois, jour = map(int, date.groups())
+
+                 # Vérifier la validité de la date
+                if not est_date_valide(annee, mois, jour):
+                    messagebox.showerror("Erreur", "Veuillez entrer une date valide.")
+            else:
+                messagebox.showerror("Erreur", "Veuillez entrer une date dans le format AAAA/MM/JJ.")
+    elif len(date_lenght)>2:
+        # Afficher un message d'erreur si la date n'est pas dans le bon format
+        messagebox.showerror("Erreur", "Veuillez entrer une date.")
+
     #Recuperer le type de source selectionne
     type = checkbutton_selection()
 
     #Recuperer les auteurs selectionnes
     auteurs = auteurs_selection() 
 
-    # Etape 1 : obtenir les mots-clefs à partir du champ de texte
-    mots_clefs = entry_mots_clefs.get().split()
+    #liste des auteurs selectionne avec un autre format
+    liste_auteurs_choisi = auteurs.split(',')
 
     # Utiliser la méthode creer_vocabulaire pour obtenir le vocabulaire
     _, _, vocabulaire_corpus, _, _, _ = corpus.creer_vocabulaire()
@@ -76,9 +123,6 @@ def effectuer_recherche():
     corpus_texte = [doc.texte for doc in corpus.id2doc.values()]
     corpus_vecteur = vectorizer.transform(corpus_texte)
     similarite = cosine_similarity(corpus_vecteur, mots_clefs_vecteur).flatten()
-
-    #liste des auteurs selectionne
-    liste_auteurs_choisi = auteurs.split(',')
 
     # Afficher les documents qui contiennent au moins un mot-clé avec le score de similarité
     documents_retrouves = []
@@ -107,7 +151,7 @@ def effectuer_recherche():
         # On cherche les mots clés dans le texte ou dans le titre du document
         if mots_trouves_texte or mots_trouves_titre:           
             if document not in documents_retrouves:
-                if type_auteur==True and type == "null" or type.lower() in document.url.lower():
+                if type_auteur==True and (type == "null" or type.lower() in document.url.lower()) and (document.date == date_entre or len(date_entre)==0):
                     documents_retrouves.append((document, score_document))
 
     # Trier les résultats par score de similarité
@@ -128,7 +172,8 @@ def effectuer_recherche():
             if (score_document != 0 or meilleur_resultat_affiche < 3) and (mots_trouves_titre or meilleur_resultat_affiche < 3):
 
                 zone_texte.insert(tk.END, f"Résultat {i + 1} :\n", "gras")
-                zone_texte.insert(tk.END, f"Titre du document : {document.titre}\n", )
+                zone_texte.insert(tk.END, f"Titre du document : {document.titre}\n")
+                zone_texte.insert(tk.END, f"Date du document : {document.date}\n")
                 zone_texte.insert(tk.END, f"Auteurs du document: {''.join(document.auteur)}\n")
                 if document.texte  != "":
                     #si le doc est vide ne pas écrire
@@ -154,6 +199,16 @@ def effectuer_recherche():
                             zone_texte.tag_add("bleu", start_index, end_index)
                             start_index = end_index
 
+                # Mettre en vert la date écrite
+                if len(date_entre)!=0:
+                    start_index = "1.0"
+                    while start_index:
+                        start_index = zone_texte.search(date_entre, start_index, tk.END, nocase=True)
+                        if start_index:
+                            end_index = f"{start_index}+{len(date_entre)}c"
+                            zone_texte.tag_add("vert", start_index, end_index)
+                            start_index = end_index
+
                 zone_texte.insert(tk.END, f"Score de similarité: {score_document}\n")
                 zone_texte.insert(tk.END, "=" * 150 + "\n")
                 meilleur_resultat_affiche += 1
@@ -164,18 +219,41 @@ def effectuer_recherche():
 
 
 def afficher_corpus():
+    # Etape 1 : Effacer le contenu précédent du widget de texte
+    zone_texte.config(state=tk.NORMAL)
+    zone_texte.delete(1.0, tk.END) 
+    
+    # Etape 2 : obtenir les différents éléments de recherche sélectionné par l'utilisateur à partir des différents éléments
     #Recuperer le type de source
     type = checkbutton_selection()
 
     #Recuperer les auteurs
     auteurs = auteurs_selection()
-
-    # Effacer le contenu précédent du widget de texte
-    zone_texte.config(state=tk.NORMAL)
-    zone_texte.delete(1.0, tk.END)
-
-    #liste des auteurs selectionne
+    #liste des auteurs selectionne avec un autre format
     liste_auteurs_choisi = auteurs.split(',')
+
+    #Recuperer la date entrez
+    date_entre = entry_date.get().strip()
+   
+    # Vérifier qu'il y a une seule date
+    date_lenght = date_entre.split()
+
+    if len(date_lenght) == 1:
+            #verifie le format
+            date_regex = re.compile(r'^(\d{4})/(\d{2})/(\d{2})$')
+            date =date_regex.match(date_entre)
+            if date:
+                annee, mois, jour = map(int, date.groups())
+
+                 # Vérifier la validité de la date
+                if not est_date_valide(annee, mois, jour):
+                    messagebox.showerror("Erreur", "Veuillez entrer une date valide.")
+            else:
+                messagebox.showerror("Erreur", "Veuillez entrer une date dans le format AAAA/MM/JJ.")
+    elif len(date_lenght) > 1:
+        # Afficher un message d'erreur si la date n'est pas dans le bon format
+        messagebox.showerror("Erreur", "Veuillez entrer une date.")
+
 
     # Afficher l'ensemble du corpus    
     for document in corpus.id2doc.values():
@@ -201,8 +279,9 @@ def afficher_corpus():
             type_auteur = True
 
         # Vérifiez si la condition est satisfaite
-        if type_auteur and type_condition:
+        if type_auteur and type_condition and (document.date == date_entre or len(date_entre)==0):
             zone_texte.insert(tk.END, f"Titre du document: {document.titre}\n")
+            zone_texte.insert(tk.END, f"Date du document : {document.date}\n")
             zone_texte.insert(tk.END, f"Auteurs du document: {''.join(document.auteur)}\n")
             zone_texte.insert(tk.END, f"Type du document: {document.url}\n")
             if document.texte  != "":
@@ -219,6 +298,16 @@ def afficher_corpus():
                 if start_index:
                     end_index = f"{start_index}+{len(auteur)}c"
                     zone_texte.tag_add("bleu", start_index, end_index)
+                    start_index = end_index
+
+        # Mettre en vert la date écrite
+        if len(date_entre) != 0:
+            start_index = "1.0"
+            while start_index:
+                start_index = zone_texte.search(date_entre, start_index, tk.END, nocase=True)
+                if start_index:
+                    end_index = f"{start_index}+{len(date_entre)}c"
+                    zone_texte.tag_add("vert", start_index, end_index)
                     start_index = end_index
     
     # Activer la modification de la zone de texte
@@ -292,47 +381,80 @@ label_o.pack(side=tk.LEFT, padx=2)
 label_n = tk.Label(cadre_python, text="n", font=("Helvetica", 30), fg="red")
 label_n.pack(side=tk.LEFT, padx=2)
 
+# Ajouter une étiquette
+label_mots_cles = Label(fenetre, text="Veuillez entrer des mots-clés séparés par un espace :")
+label_mots_cles.pack(pady=5)
+
 # Créer un champ de texte (Entry) pour les mots-clés
 entry_mots_clefs = Entry(fenetre, width=40)
 entry_mots_clefs.pack(pady=10)
 
-#Créer un cadre pour les boutons
-cadre_boutons = tk.Frame(fenetre)
-cadre_boutons.pack()
+#Créer un cadre pour les boutons et des options
+cadre_boutons_options = tk.Frame(fenetre)
+cadre_boutons_options.pack()
 
-# Créer un bouton pour effectuer la recherche
-bouton_recherche = Button(cadre_boutons, text="Rechercher", command=effectuer_recherche)
-bouton_recherche.pack(side=tk.LEFT, padx=5)
+# Espace pour sélectionner un type de source
+cadre_sources = tk.Frame(cadre_boutons_options)
+cadre_sources.grid(row=0, column=0, padx=5, pady=5)
 
-# Créer un bouton pour afficher tout le corpus
-bouton_afficher_corpus = Button(cadre_boutons, text="Afficher Tout le Corpus", command=afficher_corpus)
-bouton_afficher_corpus.pack(side=tk.LEFT, padx=5)
+label_source = tk.Label(cadre_sources, text="Sources :")
+label_source.grid(row=0, column=0, pady=5)
 
-#Espace pour sélectionner un type de source
 # Sources disponibles
 source = ["Reddit", "ArXiv"]
 
 # Variables pour stocker l'état des Checkbuttons
 variables = [tk.IntVar() for _ in source]
 
-# Créer les Checkbuttons et les ajouter à la fenêtre
+# Créer les Checkbuttons et les ajouter au sous-cadre
 for i, option in enumerate(source):
-    checkbutton = tk.Checkbutton(cadre_boutons, text=option, variable=variables[i], command=lambda i=i: selection_unique(i))
-    checkbutton.pack(side=tk.LEFT, padx=5)
+    checkbutton = tk.Checkbutton(cadre_sources, text=option, variable=variables[i], command=lambda i=i: selection_unique(i))
+    checkbutton.grid(row=1, column=i, padx=5, pady=5)
 
-#Espace pour sélectionner un ou plusieurs auteurs
+# Espace pour sélectionner un ou plusieurs auteurs
+cadre_auteurs = tk.Frame(cadre_boutons_options)
+cadre_auteurs.grid(row=0, column=1, padx=5, pady=5)
+
+label_auteurs = tk.Label(cadre_auteurs, text="Auteurs :")
+label_auteurs.grid(row=0, column=1, pady=5)
+
 # Listebox pour afficher la liste des auteurs
-listebox_auteurs = tk.Listbox(cadre_boutons, selectmode=tk.MULTIPLE, height=5, width=30)
+listebox_auteurs = tk.Listbox(cadre_auteurs, selectmode=tk.MULTIPLE, height=5, width=30)
 for auteur in liste_auteurs:
     listebox_auteurs.insert(tk.END, auteur)
-listebox_auteurs.pack(side=tk.LEFT, padx=5, pady=10)
+listebox_auteurs.grid(row=1, column=1, padx=5, pady=10, sticky="nsew")
 
 # Barre de défilement pour la Listebox
-scrollbar_auteurs = tk.Scrollbar(cadre_boutons, orient=tk.VERTICAL, command=listebox_auteurs.yview)
-scrollbar_auteurs.pack(side=tk.RIGHT, fill=tk.Y)
+scrollbar_auteurs = tk.Scrollbar(cadre_auteurs, orient=tk.VERTICAL, command=listebox_auteurs.yview)
+scrollbar_auteurs.grid(row=1, column=2, sticky="ns", pady=10)
 
 # Associer la barre de défilement à la Listebox
 listebox_auteurs.config(yscrollcommand=scrollbar_auteurs.set)
+
+
+#Espace pour ecrire une date
+cadre_date = tk.Frame(cadre_boutons_options)
+cadre_date.grid(row=0, column=2, padx=5, pady=5)
+
+# Ajouter une étiquette
+label_date = Label(cadre_date, text="Veuillez entrer la date (AAAA/MM/JJ) :")
+label_date.grid(row=0, column=2, pady=5)
+
+
+# Créer un champ de texte pour la date
+entry_date = Entry(cadre_date, width=20)
+entry_date.grid(row=1, column=2, pady=5)
+
+# Créer un bouton pour effectuer la recherche
+bouton_recherche = Button(cadre_boutons_options, text="Rechercher", command=effectuer_recherche)
+#bouton_recherche.pack(side=tk.LEFT, padx=5)
+bouton_recherche.grid(row=0, column=3, padx=5)
+
+
+# Créer un bouton pour afficher tout le corpus
+bouton_afficher_corpus = Button(cadre_boutons_options, text="Afficher Tout le Corpus", command=afficher_corpus)
+#bouton_afficher_corpus.pack(side=tk.LEFT, padx=5)
+bouton_afficher_corpus.grid(row=0, column=4, padx=5)
 
 # Créer un cadre (Frame) pour contenir la zone de texte et la barre de défilement
 cadre_texte = tk.Frame(fenetre)
@@ -361,8 +483,6 @@ cadre_temporel.pack()
 bouton_temporel = Button(cadre_temporel, text="Générer Frise Temporelle", command=generer_frise_temporelle)
 bouton_temporel.pack(side=tk.LEFT, padx=5)
 
-
-
 # Configurer la barre de défilement pour répondre à la molette de la souris
 zone_texte.bind("<MouseWheel>", configurer_barre_defilement)
 
@@ -371,6 +491,9 @@ zone_texte.tag_configure("rouge", foreground="red")
 
 # Configurer le style de texte pour la couleur bleu
 zone_texte.tag_configure("bleu", foreground="blue")
+
+# Configurer le style de texte pour la couleur vert
+zone_texte.tag_configure("vert", foreground="green")
 
 # Créer un style de texte pour le texte en gras
 zone_texte.tag_configure("gras", font=("Helvetica", 10, "bold"))
