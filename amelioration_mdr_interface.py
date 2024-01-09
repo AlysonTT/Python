@@ -59,7 +59,7 @@ def est_date_valide(annee, mois, jour):
     if not (1900 <= annee <= 2024):
         return False
 
-    # Vérification du mois (entre 1 et 12)
+    # Vérification du mois
     if not (1 <= mois <= 12):
         return False
 
@@ -77,33 +77,15 @@ def est_date_valide(annee, mois, jour):
 #fonction pour effectuer une recherche avec des mots-clés
 #un type de source ou des auteurs spécifiés ou non  
 def effectuer_recherche():
-    #Recuperer le type de source selectionne
-    type = checkbutton_selection()
-
-    #Recuperer les auteurs selectionnes
-    auteurs = auteurs_selection() 
-
-    #Recuperer la date entrez
+    # Etape 1 : obtenir les différents éléments de recherche sélectionné par l'utilisateur à partir des différents éléments
+    #mots-cles entrez dans le champ texte
+    mots_clefs = entry_mots_clefs.get().split()
+    
+    #date entrez dans le champ texte
     date_entre = entry_date.get().strip()
 
-    # Etape 1 : obtenir les mots-clefs à partir du champ de texte
-    mots_clefs = entry_mots_clefs.get().split()
-
-    # Utiliser la méthode creer_vocabulaire pour obtenir le vocabulaire
-    _, _, vocabulaire_corpus, _, _, _ = corpus.creer_vocabulaire()
-
-    # Etape 2 : transformer ces mots-clefs sous la forme d’un vecteur sur le vocabulaire précédemment construit
-    vectorizer = CountVectorizer(vocabulary=vocabulaire_corpus)  
-    mots_clefs_vecteur = vectorizer.transform([' '.join(mots_clefs)])
-
-    # Etape 3 : calculer une similarité entre votre vecteur requête et tous les documents
-    corpus_texte = [doc.texte for doc in corpus.id2doc.values()]
-    corpus_vecteur = vectorizer.transform(corpus_texte)
-    similarite = cosine_similarity(corpus_vecteur, mots_clefs_vecteur).flatten()
-    
-    # Vérifier qu'il y a une seule date
+    # Vérifier qu'il y a un seul mot
     date_lenght = date_entre.split()
-
     if len(date_lenght) == 1:
             #verifie le format
             date_regex = re.compile(r'^(\d{4})/(\d{2})/(\d{2})$')
@@ -116,12 +98,30 @@ def effectuer_recherche():
                     messagebox.showerror("Erreur", "Veuillez entrer une date valide.")
             else:
                 messagebox.showerror("Erreur", "Veuillez entrer une date dans le format AAAA/MM/JJ.")
-    elif len(date_lenght) > 1:
+    elif len(date_lenght)>2:
         # Afficher un message d'erreur si la date n'est pas dans le bon format
         messagebox.showerror("Erreur", "Veuillez entrer une date.")
-    
-    #liste des auteurs selectionne
+
+    #Recuperer le type de source selectionne
+    type = checkbutton_selection()
+
+    #Recuperer les auteurs selectionnes
+    auteurs = auteurs_selection() 
+
+    #liste des auteurs selectionne avec un autre format
     liste_auteurs_choisi = auteurs.split(',')
+
+    # Utiliser la méthode creer_vocabulaire pour obtenir le vocabulaire
+    _, _, vocabulaire_corpus, _, _, _ = corpus.creer_vocabulaire()
+
+    # Etape 2 : transformer ces mots-clefs sous la forme d’un vecteur sur le vocabulaire précédemment construit
+    vectorizer = CountVectorizer(vocabulary=vocabulaire_corpus)  
+    mots_clefs_vecteur = vectorizer.transform([' '.join(mots_clefs)])
+
+    # Etape 3 : calculer une similarité entre votre vecteur requête et tous les documents
+    corpus_texte = [doc.texte for doc in corpus.id2doc.values()]
+    corpus_vecteur = vectorizer.transform(corpus_texte)
+    similarite = cosine_similarity(corpus_vecteur, mots_clefs_vecteur).flatten()
 
     # Afficher les documents qui contiennent au moins un mot-clé avec le score de similarité
     documents_retrouves = []
@@ -129,7 +129,7 @@ def effectuer_recherche():
         mots_trouves_texte = all(mot.lower() in document.texte.lower() for mot in mots_clefs)
         mots_trouves_titre = all(mot.lower() in document.titre.lower() for mot in mots_clefs)
         #any pour au moins un des mots clé all pour tous
-
+        
         type_auteur = False
         #lise des auteurs du document
         liste_auteurs_doc = document.auteur.split(',')
@@ -150,7 +150,7 @@ def effectuer_recherche():
         # On cherche les mots clés dans le texte ou dans le titre du document
         if mots_trouves_texte or mots_trouves_titre:           
             if document not in documents_retrouves:
-                if type_auteur==True and (type == "null" or type.lower() in document.url.lower()) and (date_entre == document.date or date_entre == []):
+                if type_auteur==True and (type == "null" or type.lower() in document.url.lower()) and (document.date == date_entre or len(date_entre)==0):
                     documents_retrouves.append((document, score_document))
 
     # Trier les résultats par score de similarité
@@ -169,9 +169,8 @@ def effectuer_recherche():
             #if score_document != 0 and meilleur_resultat_affiche < 3:
             #if meilleur_resultat_affiche < 3:
             if (score_document != 0 or meilleur_resultat_affiche < 3) and (mots_trouves_titre or meilleur_resultat_affiche < 3):
-
                 zone_texte.insert(tk.END, f"Résultat {i + 1} :\n", "gras")
-                zone_texte.insert(tk.END, f"Titre du document : {document.titre}\n", )
+                zone_texte.insert(tk.END, f"Titre du document : {document.titre}\n")
                 zone_texte.insert(tk.END, f"Date du document : {document.date}\n")
                 zone_texte.insert(tk.END, f"Auteurs du document: {''.join(document.auteur)}\n")
                 if document.texte  != "":
@@ -199,13 +198,14 @@ def effectuer_recherche():
                             start_index = end_index
                 
                 # Mettre en vert la date écrite
-                start_index = "1.0"
-                while start_index:
-                    start_index = zone_texte.search(date_entre, start_index, tk.END, nocase=True)
-                    if start_index:
-                        end_index = f"{start_index}+{len(date_entre)}c"
-                        zone_texte.tag_add("vert", start_index, end_index)
-                        start_index = end_index
+                if len(date_entre)!=0:
+                    start_index = "1.0"
+                    while start_index:
+                        start_index = zone_texte.search(date_entre, start_index, tk.END, nocase=True)
+                        if start_index:
+                            end_index = f"{start_index}+{len(date_entre)}c"
+                            zone_texte.tag_add("vert", start_index, end_index)
+                            start_index = end_index
 
                 zone_texte.insert(tk.END, f"Score de similarité: {score_document}\n")
                 zone_texte.insert(tk.END, "=" * 150 + "\n")
@@ -214,7 +214,7 @@ def effectuer_recherche():
     
         # Désactiver la modification de la zone de texte
         zone_texte.config(state=tk.DISABLED)
-
+    
 
 def afficher_corpus():
     #Recuperer le type de source
@@ -223,9 +223,30 @@ def afficher_corpus():
     #Recuperer les auteurs
     auteurs = auteurs_selection()
 
+    #Recuperer la date entrez
+    date_entre = entry_date.get().strip()
     # Effacer le contenu précédent du widget de texte
     zone_texte.config(state=tk.NORMAL)
     zone_texte.delete(1.0, tk.END)
+    # Vérifier qu'il y a une seule date
+    date_lenght = date_entre.split()
+    print("date ",date_lenght)
+
+    if len(date_lenght) == 1:
+            #verifie le format
+            date_regex = re.compile(r'^(\d{4})/(\d{2})/(\d{2})$')
+            date =date_regex.match(date_entre)
+            if date:
+                annee, mois, jour = map(int, date.groups())
+
+                 # Vérifier la validité de la date
+                if not est_date_valide(annee, mois, jour):
+                    messagebox.showerror("Erreur", "Veuillez entrer une date valide.")
+            else:
+                messagebox.showerror("Erreur", "Veuillez entrer une date dans le format AAAA/MM/JJ.")
+    elif len(date_lenght) > 1:
+        # Afficher un message d'erreur si la date n'est pas dans le bon format
+        messagebox.showerror("Erreur", "Veuillez entrer une date.")
 
     #liste des auteurs selectionne
     liste_auteurs_choisi = auteurs.split(',')
@@ -252,9 +273,10 @@ def afficher_corpus():
         #si aucun auteurs selectionné, on affiche tous les documents
         if auteurs == "null":
             type_auteur = True
-
+        print("avant le if")
         # Vérifiez si la condition est satisfaite
-        if type_auteur and type_condition:
+        if type_auteur and type_condition and (date_entre == document.date or len(date_entre)==0):
+            print("DANS le if")
             zone_texte.insert(tk.END, f"Titre du document: {document.titre}\n")
             zone_texte.insert(tk.END, f"Date du document : {document.date}\n")
             zone_texte.insert(tk.END, f"Auteurs du document: {''.join(document.auteur)}\n")
@@ -274,6 +296,15 @@ def afficher_corpus():
                     end_index = f"{start_index}+{len(auteur)}c"
                     zone_texte.tag_add("bleu", start_index, end_index)
                     start_index = end_index
+
+        # Mettre en vert la date écrite
+        start_index = "1.0"
+        while start_index:
+            start_index = zone_texte.search(date_entre, start_index, tk.END, nocase=True)
+            if start_index:
+                end_index = f"{start_index}+{len(date_entre)}c"
+                zone_texte.tag_add("vert", start_index, end_index)
+                start_index = end_index
     
     
     # Activer la modification de la zone de texte
@@ -397,6 +428,7 @@ zone_texte.pack(side=tk.LEFT, expand=True, fill='both')
 # Ajouter une étiquette
 label_date = Label(fenetre, text="Veuillez entrer la date (AAAA/MM/JJ) :")
 label_date.pack(pady=5)
+
 # Créer un champ de texte (Entry) pour la date
 entry_date = Entry(fenetre, width=40)
 entry_date.pack(pady=10)
