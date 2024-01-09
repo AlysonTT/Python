@@ -196,6 +196,8 @@ def effectuer_recherche():
                 zone_texte.insert(tk.END, f"Titre du document : {document.titre}\n")
                 zone_texte.insert(tk.END, f"Auteurs du document: {''.join(document.auteur)}\n")
                 zone_texte.insert(tk.END, f"Date du document : {document.date}\n")
+                zone_texte.insert(tk.END, f"Lien du document : {document.url}\n")
+
                 if document.texte  != "":
                     #si le doc est vide ne pas écrire
                     zone_texte.insert(tk.END, f"Contenu du document :\n{document.texte}\n")
@@ -294,6 +296,10 @@ def afficher_corpus():
     # Etape 1 : Effacer le contenu précédent du widget de texte
     zone_texte.config(state=tk.NORMAL)
     zone_texte.delete(1.0, tk.END) 
+    
+    #deselectionne le check du type si active
+    checkbutton.deselect()
+
     
     '''AJOUTER'''
     
