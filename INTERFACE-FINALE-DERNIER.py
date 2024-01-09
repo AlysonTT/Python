@@ -196,6 +196,8 @@ def effectuer_recherche():
                 zone_texte.insert(tk.END, f"Titre du document : {document.titre}\n")
                 zone_texte.insert(tk.END, f"Auteurs du document: {''.join(document.auteur)}\n")
                 zone_texte.insert(tk.END, f"Date du document : {document.date}\n")
+                zone_texte.insert(tk.END, f"Lien du document : {document.url}\n")
+
                 if document.texte  != "":
                     #si le doc est vide ne pas écrire
                     zone_texte.insert(tk.END, f"Contenu du document :\n{document.texte}\n")
@@ -271,7 +273,6 @@ def effectuer_recherche():
 def afficher_details_selectionnes(corpus, checkbutton_vars_afficher, zone_texte, numDoc):
     document = next(doc for doc in corpus.id2doc.values() if doc.numDoc == numDoc)
 
-
     zone_texte.config(state=tk.NORMAL)
     zone_texte.delete(1.0, tk.END)
 
@@ -282,6 +283,7 @@ def afficher_details_selectionnes(corpus, checkbutton_vars_afficher, zone_texte,
     for document in documents_selectionnes:
         zone_texte.insert(tk.END, f"Titre du document : {document.titre}\n", "gras")
         zone_texte.insert(tk.END, f"Auteur du document : {document.auteur}\n")
+        zone_texte.insert(tk.END, f"Date du document : {document.date}\n")
         zone_texte.insert(tk.END, f"URL du document : {document.url}\n")
         zone_texte.insert(tk.END, f"Contenu du document :\n{document.texte}\n")
         zone_texte.insert(tk.END, "=" * 150 + "\n")
@@ -295,6 +297,10 @@ def afficher_corpus():
     zone_texte.config(state=tk.NORMAL)
     zone_texte.delete(1.0, tk.END) 
     
+    #deselectionne le check du type si active
+    checkbutton.deselect()
+
+    
     '''AJOUTER'''
     
     boutons_par_document = {}
@@ -305,57 +311,8 @@ def afficher_corpus():
 
     '''AJOUTER'''
 
-    # Etape 2 : obtenir les différents éléments de recherche sélectionné par l'utilisateur à partir des différents éléments
-    #Recuperer le type de source
-    type = checkbutton_selection()
-
-    #Recuperer les auteurs
-    auteurs = auteurs_selection()
-    #liste des auteurs selectionne avec un autre format
-    liste_auteurs_choisi = auteurs.split(',')
-
-    #Recuperer la date entrez
-    date_entre = entry_date.get().strip()
-   
-    # Vérifier qu'il y a une seule date
-    date_lenght = date_entre.split()
-
-    if len(date_lenght) == 1:
-            #verifie le format
-            date_regex = re.compile(r'^(\d{4})/(\d{2})/(\d{2})$')
-            date =date_regex.match(date_entre)
-            if date:
-                annee, mois, jour = map(int, date.groups())
-
-                 # Vérifier la validité de la date
-                if not est_date_valide(annee, mois, jour):
-                    messagebox.showerror("Erreur", "Veuillez entrer une date valide.")
-            else:
-                messagebox.showerror("Erreur", "Veuillez entrer une date dans le format AAAA/MM/JJ.")
-    elif len(date_lenght) > 1:
-        # Afficher un message d'erreur si la date n'est pas dans le bon format
-        messagebox.showerror("Erreur", "Veuillez entrer une date.")
-
-
-    # Afficher l'ensemble du corpus    
+    # Etape 2 : Afficher l'ensemble du corpus    
     for document in corpus.id2doc.values():
-        type_auteur = False
-        #lise des auteurs du document
-        liste_auteurs_doc = document.auteur.split(',')
-
-       # Supprimer les espaces avant et après chaque nom dans les deux listes
-        liste_auteurs_choisi = [auteur.strip() for auteur in liste_auteurs_choisi]
-        liste_auteurs_doc = [auteur.strip() for auteur in liste_auteurs_doc]
-
-        #on regarde si un des auteurs a écrit le document
-        for auteur in liste_auteurs_doc:
-            if auteur in liste_auteurs_choisi:
-                type_auteur = True
-                break
-
-        # Vérifiez également la condition de type
-        type_condition = type == "null" or type.lower() in document.url.lower()
-
         ''''AJOUTER'''
 
         zone_texte.insert(tk.END, f"Titre du document : {document.titre}\n", "gras")
@@ -382,41 +339,15 @@ def afficher_corpus():
         boutons_par_document[document] = (var_afficher, var_comparer)
         '''AJOUTER'''
 
-        #si aucun auteurs selectionnés, on affiche tous les documents
-        if auteurs == "null":
-            type_auteur = True
-
-        # Vérifiez si la condition est satisfaite
-        if type_auteur and type_condition and (document.date == date_entre or len(date_entre)==0):
-            zone_texte.insert(tk.END, f"Titre du document: {document.titre}\n")
-            zone_texte.insert(tk.END, f"Auteurs du document: {''.join(document.auteur)}\n")
-            zone_texte.insert(tk.END, f"Date du document : {document.date}\n")
-            zone_texte.insert(tk.END, f"Type du document: {document.url}\n")
-            if document.texte  != "":
-                #si le doc est vide ne pas écrire
-                zone_texte.insert(tk.END, f"Contenu du document :\n{document.texte}\n")
-            zone_texte.insert(tk.END, "=" * 150 + "\n")
-
-
-        # Mettre en bleu les auteurs selectionnés
-        for auteur in liste_auteurs_choisi:
-            start_index = "1.0"
-            while start_index:
-                start_index = zone_texte.search(auteur, start_index, tk.END, nocase=True)
-                if start_index:
-                    end_index = f"{start_index}+{len(auteur)}c"
-                    zone_texte.tag_add("bleu", start_index, end_index)
-                    start_index = end_index
-
-        # Mettre en vert la date écrite
-        if len(date_entre) != 0:
-            start_index = "1.0"
-            while start_index:
-                start_index = zone_texte.search(date_entre, start_index, tk.END, nocase=True)
-                if start_index:
-                    end_index = f"{start_index}+{len(date_entre)}c"
-                    zone_texte.tag_add("vert", start_index, end_index)
-                    start_index = end_index
+        # Affiche les informations de chaque document
+        zone_texte.insert(tk.END, f"Titre du document: {document.titre}\n")
+        zone_texte.insert(tk.END, f"Auteurs du document: {''.join(document.auteur)}\n")
+        zone_texte.insert(tk.END, f"Date du document : {document.date}\n")
+        zone_texte.insert(tk.END, f"Type du document: {document.url}\n")
+        if document.texte  != "":
+            #si le doc est vide ne pas écrire
+            zone_texte.insert(tk.END, f"Contenu du document :\n{document.texte}\n")
+        zone_texte.insert(tk.END, "=" * 150 + "\n")
     
     '''AJOUTER'''
     checkbutton_vars_afficher.update({doc.numDoc: var_afficher for doc, (var_afficher, _) in boutons_par_document.items()})
