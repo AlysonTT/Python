@@ -46,7 +46,7 @@ def checkbutton_selection():
     else:
         return "null"
 
-#fonction pour savoir quel auteurs ont été sélectionné
+#fonction pour savoir quels auteurs ont été sélectionné
 def auteurs_selection():
     auteurs_selectionnes = [listebox_auteurs.get(i) for i in listebox_auteurs.curselection()]
     if auteurs_selectionnes:
@@ -274,7 +274,7 @@ def afficher_corpus():
         # Vérifiez également la condition de type
         type_condition = type == "null" or type.lower() in document.url.lower()
 
-        #si aucun auteurs selectionné, on affiche tous les documents
+        #si aucun auteurs selectionnés, on affiche tous les documents
         if auteurs == "null":
             type_auteur = True
 
@@ -312,6 +312,7 @@ def afficher_corpus():
     
     # Activer la modification de la zone de texte
     zone_texte.config(state=tk.DISABLED)
+    
 
 def configurer_barre_defilement(event):
     zone_texte.yview_scroll(-1 * (event.delta // 120), "units")
@@ -323,8 +324,6 @@ def generer_frise_temporelle():
     # Vérifier qu'il y a un seul mot
     mots = mot_recherche.strip().split()
     if len(mots) == 1:
-        print("L'utilisateur a bien entré un seul mot :", mot_recherche)
-
         # On va recuperer les donnees temporelle du mot entrez par l'utilisateur
         informations_temporelles = corpus.extraire_informations_temporelles(mot_recherche)
             
@@ -351,11 +350,16 @@ def generer_frise_temporelle():
     else:
         messagebox.showerror("Erreur", "Veuillez entrer un seul mot.")
 
-        print("Veuillez entrer un seul mot.")
-
 
 # Créer une nouvelle fenêtre Tkinter
 fenetre = tk.Tk()
+# Obtenez la largeur et la hauteur de l'écran
+largeur_ecran = fenetre.winfo_screenwidth()
+hauteur_ecran = fenetre.winfo_screenheight()
+
+# Définissez la position initiale de la fenêtre (x_position, y_position)
+fenetre.geometry(f"+{largeur_ecran // 4}+0")
+
 fenetre.title("Recherche de documents")
 
 # Créer un cadre pour les libellés "Python"
@@ -431,7 +435,6 @@ scrollbar_auteurs.grid(row=1, column=2, sticky="ns", pady=10)
 # Associer la barre de défilement à la Listebox
 listebox_auteurs.config(yscrollcommand=scrollbar_auteurs.set)
 
-
 #Espace pour ecrire une date
 cadre_date = tk.Frame(cadre_boutons_options)
 cadre_date.grid(row=0, column=2, padx=5, pady=5)
@@ -440,20 +443,16 @@ cadre_date.grid(row=0, column=2, padx=5, pady=5)
 label_date = Label(cadre_date, text="Veuillez entrer la date (AAAA/MM/JJ) :")
 label_date.grid(row=0, column=2, pady=5)
 
-
 # Créer un champ de texte pour la date
 entry_date = Entry(cadre_date, width=20)
 entry_date.grid(row=1, column=2, pady=5)
 
 # Créer un bouton pour effectuer la recherche
 bouton_recherche = Button(cadre_boutons_options, text="Rechercher", command=effectuer_recherche)
-#bouton_recherche.pack(side=tk.LEFT, padx=5)
 bouton_recherche.grid(row=0, column=3, padx=5)
-
 
 # Créer un bouton pour afficher tout le corpus
 bouton_afficher_corpus = Button(cadre_boutons_options, text="Afficher Tout le Corpus", command=afficher_corpus)
-#bouton_afficher_corpus.pack(side=tk.LEFT, padx=5)
 bouton_afficher_corpus.grid(row=0, column=4, padx=5)
 
 # Créer un cadre (Frame) pour contenir la zone de texte et la barre de défilement
@@ -471,7 +470,12 @@ barre_defilement.pack(side=tk.RIGHT, fill=tk.Y)
 # Configurer la zone de texte pour utiliser la barre de défilement
 zone_texte.config(yscrollcommand=barre_defilement.set)
 
-# Créer un champ de texte (Entry) pour le mot ou on veut avoir sa frise temporelle
+#Espace pour la frise temporelle
+# Ajouter une étiquette
+label_temporel = Label(fenetre, text="Veuillez entrer le mot-clé pour obtenir sa frise temporelle :")
+label_temporel.pack(pady=5)
+
+# Créer un champ de texte pour le mot ou on veut avoir sa frise temporelle
 entry_mot_temporel = Entry(fenetre, width=40)
 entry_mot_temporel.pack(pady=10)
 
