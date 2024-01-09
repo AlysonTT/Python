@@ -188,6 +188,7 @@ class Corpus:
         return vocab, vocab_mat_TF, list(vocabulaire), freq, mat_TF, mat_TFxIDF
     
      #Fonction pour avoir les informations temporelle d'un mot
+
     def extraire_informations_temporelles(self, mot_recherche):
         informations_temporelles = {}
 

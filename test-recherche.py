@@ -41,7 +41,7 @@ def checkbutton_selection(variables):
         return ", ".join(options_selectionnees)
     else:
         return "null"
-'''
+
 def effectuer_recherche(entry_mots_clefs, corpus, variables, zone_texte, selected_source):
     # Récupérer le type de source
     selected_source_type = selected_source.get()
@@ -112,119 +112,6 @@ def effectuer_recherche(entry_mots_clefs, corpus, variables, zone_texte, selecte
 
         # Désactiver la modification de la zone de texte
         zone_texte.config(state=tk.DISABLED)
-'''
-
-
-def effectuer_recherche(entry_mots_clefs, corpus, variables, zone_texte, selected_source, checkbutton_vars_afficher, checkbutton_vars_comparer):
-    # Récupérer le type de source
-    selected_source_type = selected_source.get()
-
-    # Etape 1 : obtenir les mots-clefs à partir du champ de texte
-    mots_clefs = entry_mots_clefs.get().split()
-
-    # Utiliser la méthode creer_vocabulaire pour obtenir le vocabulaire
-    _, _, vocabulaire_corpus, _, _, _ = corpus.creer_vocabulaire()
-
-    # Etape 2 : transformer ces mots-clefs sous la forme d’un vecteur sur le vocabulaire précédemment construit
-    vectorizer = CountVectorizer(vocabulary=vocabulaire_corpus)
-    mots_clefs_vecteur = vectorizer.transform([' '.join(mots_clefs)])
-
-    # Etape 3 : calculer une similarité entre votre vecteur requête et tous les documents
-    corpus_texte = [doc.texte for doc in corpus.id2doc.values()]
-    corpus_vecteur = vectorizer.transform(corpus_texte)
-    similarite = cosine_similarity(corpus_vecteur, mots_clefs_vecteur).flatten()
-
-    # Afficher les documents qui contiennent au moins un mot-clé avec le score de similarité
-    documents_retrouves = []
-    for document, score_document in zip(corpus.id2doc.values(), similarite):
-        mots_trouves_texte = all(mot.lower() in document.texte.lower() for mot in mots_clefs)
-        mots_trouves_titre = all(mot.lower() in document.titre.lower() for mot in mots_clefs)
-
-        # On cherche les mots clés dans le texte ou dans le titre du document
-        if mots_trouves_texte or mots_trouves_titre:
-            if document not in documents_retrouves:
-                if selected_source_type == "null" or selected_source_type.lower() in document.url.lower():
-                    documents_retrouves.append((document, score_document))
-
-    # Trier les résultats par score de similarité
-    documents_retrouves.sort(key=lambda x: x[1], reverse=True)
-
-    # Effacer le contenu précédent du widget de texte
-    zone_texte.config(state=tk.NORMAL)
-    zone_texte.delete(1.0, tk.END)
-
-    boutons_par_document = {}
-    boutons_afficher_temp = []  # Liste temporaire pour les Checkbutton Afficher
-
-    # Afficher les trois meilleurs résultats (avec score non nul)
-    if not documents_retrouves:
-        zone_texte.insert(tk.END, "Aucun résultat trouvé dans le corpus.")
-    else:
-        for i, (document, score_document) in enumerate(documents_retrouves):
-            if (score_document != 0 or i < 3):
-                zone_texte.insert(tk.END, f"Résultat {i + 1} :\n", "gras")
-                zone_texte.insert(tk.END, f"Titre du document : {document.titre}\n", )
-                zone_texte.insert(tk.END, f"Contenu du document :\n{document.texte}\n")
-
-                # Mettre en rouge les mots-clés dans le texte du document
-                for mot in mots_clefs:
-                    start_index = "1.0"
-                    while start_index:
-                        start_index = zone_texte.search(mot, start_index, tk.END, nocase=True)
-                        if start_index:
-                            end_index = f"{start_index}+{len(mot)}c"
-                            zone_texte.tag_add("rouge", start_index, end_index)
-                            start_index = end_index
-
-                zone_texte.insert(tk.END, f"Score de similarité: {score_document}\n")
-                zone_texte.insert(tk.END, "=" * 150 + "\n")
-
-                var_afficher = tk.IntVar()
-                bouton_check = tk.Checkbutton(zone_texte, text="Afficher", variable=var_afficher, font=("Helvetica", 10),
-                                              command=lambda doc=document, var=var_afficher: afficher_details_selectionnes(corpus, checkbutton_vars_afficher, zone_texte))
-                bouton_check.document = document
-                zone_texte.window_create(tk.END, window=bouton_check)
-                zone_texte.insert(tk.END, "\n")
-
-                var_comparer = tk.IntVar()
-                bouton_comparer_doc = tk.Checkbutton(
-                    zone_texte,
-                    text="Comparer", variable=var_comparer, font=("Helvetica", 10),
-                    command=lambda doc=document, var=var_comparer: comparer_documents(corpus, checkbutton_vars_comparer, zone_texte))
-
-                bouton_comparer_doc.document = document
-                zone_texte.window_create(tk.END, window=bouton_comparer_doc)
-                zone_texte.insert(tk.END, "\n")
-
-                boutons_par_document[document] = (var_afficher, var_comparer, score_document)
-
-        # Tri des documents par score après les avoir tous ajoutés
-        boutons_afficher_temp = sorted(boutons_par_document.items(), key=lambda x: x[1][2], reverse=True)
-
-        checkbutton_vars_afficher[:] = [var_afficher for _, (var_afficher, _, _) in boutons_afficher_temp]
-        checkbutton_vars_comparer[:] = [var_comparer for _, (_, var_comparer, _) in boutons_afficher_temp]
-
-    # Désactiver la modification de la zone de texte
-    zone_texte.config(state=tk.DISABLED)
-
-def afficher_details_selectionnes(corpus, checkbutton_vars_afficher, zone_texte):
-    zone_texte.config(state=tk.NORMAL)
-    zone_texte.delete(1.0, tk.END)
-
-    # Récupérer les documents sélectionnés
-    documents_selectionnes = [document for document, var in zip(corpus.id2doc.values(), checkbutton_vars_afficher) if var.get()]
-
-    # Afficher les détails des documents sélectionnés
-    for document in documents_selectionnes:
-        zone_texte.insert(tk.END, f"Titre du document : {document.titre}\n", "gras")
-        zone_texte.insert(tk.END, f"Auteur du document : {document.auteur}\n")
-        zone_texte.insert(tk.END, f"URL du document : {document.url}\n")
-        zone_texte.insert(tk.END, f"Contenu du document :\n{document.texte}\n")
-        zone_texte.insert(tk.END, "=" * 150 + "\n")
-
-    # Désactiver la modification de la zone de texte
-    zone_texte.config(state=tk.DISABLED)
-
 
 def afficher_corpus(corpus, checkbutton_vars_afficher, checkbutton_vars_comparer, zone_texte):
     selected_source_type = selected_source.get()
@@ -351,8 +238,6 @@ def comparer_documents(corpus, checkbutton_vars_comparer, zone_texte, numDoc=Non
 
     zone_texte.config(state=tk.DISABLED)  # Désactive la possibilité d'éditer la zone de texte
 
-
-''' A UTILISER
 def comparer_documents(corpus, checkbutton_vars_comparer, zone_texte):
     documents_selectionnes = [document for document, var in zip(corpus.id2doc.values(), checkbutton_vars_comparer) if var.get()]
 
@@ -424,7 +309,7 @@ def comparer_documents(corpus, checkbutton_vars_comparer, zone_texte):
         messagebox.showwarning("Erreur", "Vous avez sélectionné plus de deux documents. Veuillez en choisir seulement deux.")
 
     zone_texte.config(state=tk.DISABLED)  # Désactive la possibilité d'éditer la zone de texte
-'''
+
 
 '''
 def comparer_documents(corpus, checkbutton_vars_comparer, zone_texte):
@@ -507,9 +392,6 @@ def mesure_corpus(corpus, zone_texte):
     corpus_texte_nettoye = [corpus.nettoyer_texte(doc.texte) for doc in list(corpus.id2doc.values())[:100]]  # Limiter à 100 documents
     vectorizer = TfidfVectorizer(vocabulary=vocabulaire_corpus_trie, use_idf=False)
     corpus_vecteur = vectorizer.fit_transform(corpus_texte_nettoye)
-
-    zone_texte.config(state=tk.NORMAL)
-    zone_texte.delete(1.0, tk.END)
 
     # Afficher la mesure TDxIDF pour chaque mot du corpus dans la zone de texte
     zone_texte.insert(tk.END, "Mesure TDxIDF pour chaque mot du corpus :\n\n")
@@ -680,7 +562,7 @@ cadre_boutons = tk.Frame(fenetre)
 cadre_boutons.pack()
 
 # Créer un bouton pour effectuer la recherche
-bouton_recherche = Button(cadre_boutons, text="Rechercher", command=lambda: effectuer_recherche(entry_mots_clefs, corpus, variables, zone_texte, selected_source, checkbutton_vars_afficher, checkbutton_vars_comparer))
+bouton_recherche = Button(cadre_boutons, text="Rechercher", command=lambda: effectuer_recherche(entry_mots_clefs, corpus, variables, zone_texte, selected_source, checkbutton_vars_comparer))
 bouton_recherche.pack(side=tk.LEFT, padx=5)
 
 # Créer un bouton pour afficher tout le corpus

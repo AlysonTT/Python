@@ -207,6 +207,7 @@ def effectuer_recherche(entry_mots_clefs, corpus, variables, zone_texte, selecte
     # Désactiver la modification de la zone de texte
     zone_texte.config(state=tk.DISABLED)
 
+
 def afficher_details_selectionnes(corpus, checkbutton_vars_afficher, zone_texte):
     zone_texte.config(state=tk.NORMAL)
     zone_texte.delete(1.0, tk.END)
@@ -271,88 +272,6 @@ def afficher_corpus(corpus, checkbutton_vars_afficher, checkbutton_vars_comparer
     print("Valeurs de checkbutton_vars_comparer après la boucle for :", [var.get() for var in checkbutton_vars_comparer])
 
     zone_texte.config(state=tk.DISABLED)
-
-def comparer_documents(corpus, checkbutton_vars_comparer, zone_texte, numDoc=None):
-    documents_selectionnes = [document for document, var in zip(corpus.id2doc.values(), checkbutton_vars_comparer) if var.get()]
-
-    zone_texte.config(state=tk.NORMAL)  # Permet d'éditer la zone de texte
-
-    print("Documents sélectionnés pour comparaison :", documents_selectionnes)  # Débogage
-
-    if len(documents_selectionnes) == 2:
-        
-        document1 = documents_selectionnes[0]
-        document2 = documents_selectionnes[1]
-        
-        # Vérifier si numDoc est fourni et correspond à l'un des documents sélectionnés
-        if numDoc is not None and numDoc not in [document1.numDoc, document2.numDoc]:
-            messagebox.showwarning("Erreur", f"L'identifiant unique {numDoc} ne correspond à aucun des documents sélectionnés.")
-            zone_texte.config(state=tk.DISABLED)
-            return
-
-        # Utiliser la méthode creer_vocabulaire pour obtenir le vocabulaire
-        _, _, vocabulaire_corpus, _, _, _ = corpus.creer_vocabulaire()
-
-        # Transformer les documents en vecteurs sur le vocabulaire précédemment construit
-        vectorizer = CountVectorizer(vocabulary=vocabulaire_corpus)
-        document1_vecteur = vectorizer.transform([document1.texte])
-        document2_vecteur = vectorizer.transform([document2.texte])
-
-        # Calculer la similarité entre les deux documents
-        similarite = cosine_similarity(document1_vecteur, document2_vecteur).flatten()[0]
-
-        # Récupérer les indices des mots communs
-        mots_communs_indices = list(set(document1_vecteur.indices) & set(document2_vecteur.indices))
-
-        # Récupérer les mots communs
-        mots_communs = [vocabulaire_corpus[indice] for indice in mots_communs_indices]
-
-        # Calculer le nombre total de mots dans chaque document
-        total_mots_document1 = len(document1.texte.split())
-        total_mots_document2 = len(document2.texte.split())
-
-        # Afficher la similarité
-        zone_texte.config(state=tk.NORMAL)
-        zone_texte.delete(1.0, tk.END)
-        zone_texte.insert(tk.END, f"Comparaison entre {document1.titre} et {document2.titre}\n\n")
-        zone_texte.insert(tk.END, f"Similarité : {similarite}\n\n")
-        
-
-        zone_texte.insert(tk.END, f"Informations pour le premier document : \n\n")
-        zone_texte.insert(tk.END, f"Titre : {document1.titre}\n")
-        zone_texte.insert(tk.END, f"Auteurs : {document1.auteur}\n")
-        zone_texte.insert(tk.END, f"URL : {document1.url}\n")
-        zone_texte.insert(tk.END, f"Contenu :\n{document1.texte}\n\n")
-
-        zone_texte.insert(tk.END, f"Informations pour le second document :\n\n")
-        zone_texte.insert(tk.END, f"Titre : {document2.titre}\n")
-        zone_texte.insert(tk.END, f"Auteurs : {document2.auteur}\n")
-        zone_texte.insert(tk.END, f"URL : {document2.url}\n")
-        zone_texte.insert(tk.END, f"Contenu :\n{document2.texte}\n\n")
-        
-        if not mots_communs:
-            zone_texte.insert(tk.END, "Aucun mot commun trouvé.\n")
-        else:
-            # Afficher les mots communs dans la zone de texte
-            zone_texte.insert(tk.END, "Pourcentage de présence des mots communs :\n\n")
-            for mot in mots_communs:
-                pour_document1 = document1.texte.lower().count(mot.lower())/total_mots_document1*100
-                pour_document2 = document2.texte.lower().count(mot.lower())/total_mots_document1*100
-                zone_texte.insert(tk.END, f"- Mot : {mot}\n")
-                zone_texte.insert(tk.END, f"{document1.titre} : {pour_document1:.2f} %\n")
-                zone_texte.insert(tk.END, f"{document2.titre} : {pour_document2:.2f} %\n\n")
-            
-        zone_texte.config(state=tk.DISABLED)
-
-    elif len(documents_selectionnes) < 2:
-        messagebox.showwarning("Erreur", "Veuillez sélectionner exactement deux documents à comparer.")
-    else:
-        messagebox.showwarning("Erreur", "Vous avez sélectionné plus de deux documents. Veuillez en choisir seulement deux.")
-
-    zone_texte.config(state=tk.DISABLED)  # Désactive la possibilité d'éditer la zone de texte
-
-
-''' A UTILISER
 def comparer_documents(corpus, checkbutton_vars_comparer, zone_texte):
     documents_selectionnes = [document for document, var in zip(corpus.id2doc.values(), checkbutton_vars_comparer) if var.get()]
 
@@ -424,75 +343,7 @@ def comparer_documents(corpus, checkbutton_vars_comparer, zone_texte):
         messagebox.showwarning("Erreur", "Vous avez sélectionné plus de deux documents. Veuillez en choisir seulement deux.")
 
     zone_texte.config(state=tk.DISABLED)  # Désactive la possibilité d'éditer la zone de texte
-'''
 
-'''
-def comparer_documents(corpus, checkbutton_vars_comparer, zone_texte):
-    documents_selectionnes = [document for document, var in zip(corpus.id2doc.values(), checkbutton_vars_comparer) if var.get()]
-
-    zone_texte.config(state=tk.NORMAL)  # Permet d'éditer la zone de texte
-
-    print("Documents sélectionnés pour comparaison :", documents_selectionnes)  # Débogage
-
-    if len(documents_selectionnes) == 2:
-        document1 = documents_selectionnes[0]
-        document2 = documents_selectionnes[1]
-
-        # Utiliser la matrice TF-IDF du corpus pour la transformation
-        _, _, vocabulaire_corpus, _, _, mat_TFxIDF_corpus = corpus.creer_vocabulaire()
-
-        # Transformer les documents en vecteurs TF-IDF
-        vectorizer = TfidfVectorizer(vocabulary=vocabulaire_corpus, use_idf=False)
-        
-        corpus_texte_nettoye = [corpus.nettoyer_texte(doc.texte) for doc in corpus.id2doc.values()]
-        document1_texte_nettoye = corpus.nettoyer_texte(document1.texte)
-        document2_texte_nettoye = corpus.nettoyer_texte(document2.texte)
-        
-        corpus_vecteur = vectorizer.fit_transform(corpus_texte_nettoye)
-        document1_vecteur = vectorizer.transform([document1_texte_nettoye])
-        document2_vecteur = vectorizer.transform([document2_texte_nettoye])
-
-        # Calculer la similarité entre les deux documents
-        similarite = cosine_similarity(document1_vecteur, document2_vecteur).flatten()[0]
-
-        # Récupérer les indices des mots communs
-        mots_communs_indices = list(set(document1_vecteur.indices) & set(document2_vecteur.indices))
-
-        # Récupérer les mots communs et leurs valeurs TF-IDF
-        mots_communs_info = {mot: {'tfidf': mat_TFxIDF_corpus[:, indice].tolist()} for mot, indice in zip(vocabulaire_corpus, mots_communs_indices)}
-
-        # Afficher les mots communs dans la zone de texte avec leurs valeurs TF-IDF
-        zone_texte.insert(tk.END, "Mesure TF-IDF des mots communs :\n\n")
-        for mot, info in mots_communs_info.items():
-            tfidf_document1 = info['tfidf'][document1.numDoc - 1]
-            tfidf_document2 = info['tfidf'][document2.numDoc - 1]
-
-            zone_texte.insert(tk.END, f"- Mot : {mot}\n")
-            zone_texte.insert(tk.END, f"{document1.titre} - TF-IDF : {tfidf_document1:.4f}\n")
-            zone_texte.insert(tk.END, f"{document2.titre} - TF-IDF : {tfidf_document2:.4f}\n\n")
-        
-
-        zone_texte.insert(tk.END, f"Similarité : {similarite}\n\n")
-
-        zone_texte.insert(tk.END, f"Informations pour le premier document : \n\n")
-        zone_texte.insert(tk.END, f"Titre : {document1.titre}\n")
-        zone_texte.insert(tk.END, f"Auteurs : {document1.auteur}\n")
-        zone_texte.insert(tk.END, f"URL : {document1.url}\n")
-        zone_texte.insert(tk.END, f"Contenu :\n{document1.texte}\n\n")
-
-        zone_texte.insert(tk.END, f"Informations pour le second document :\n\n")
-        zone_texte.insert(tk.END, f"Titre : {document2.titre}\n")
-        zone_texte.insert(tk.END, f"Auteurs : {document2.auteur}\n")
-        zone_texte.insert(tk.END, f"URL : {document2.url}\n")
-        zone_texte.insert(tk.END, f"Contenu :\n{document2.texte}\n\n")
-
-    elif len(documents_selectionnes) < 2:
-        messagebox.showwarning("Erreur", "Veuillez sélectionner exactement deux documents à comparer.")
-    else:
-        messagebox.showwarning("Erreur", "Vous avez sélectionné plus de deux documents. Veuillez en choisir seulement deux.")
-
-    zone_texte.config(state=tk.DISABLED)  # Désactive la possibilité d'éditer la zone de texte
-'''
 
 def mesure_corpus(corpus, zone_texte):
     zone_texte.config(state=tk.NORMAL)
