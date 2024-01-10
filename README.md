@@ -8,14 +8,20 @@
 - TEL-TELLAS Alyson
 - VIVIER Maude
 
-## Bibliothèques à installées
-- scikit-learn
-- matplotlib
-- numpy
-- tkinter
-- pickle
+## Bibliothèques
 
-Commande pour les intallées : **pip install scikit-learn matplotlib numpy tkinter pickle**
+### Bibliothéques inclus avec Python
+- tkinter : pour l'interface graphique et notamment sa simplicité d'utilisation et son intégration harmonieuse avec notre projet.
+- pickle : pour le chargement du corpus à partir de "corpus.plk".
+  
+### Bibliothéques à installer
+- scikit-learn : afin de réaliser et simplifier l'analyse des donnée et les différents calcul nécessaire ua bon focntionnement des options proposées.
+- matplotlib : permet la representation des différents graquiques une fois les différents traitement des données rélisé.
+- numpy : très utile pour le travail sur les tableaux multidimensionnels.
+- praw : est utilisé spécifiquement pour interagir avec l'API de Reddit.
+- urllib : pour travailler avec des ressources web tel que les URLs.
+
+Commande pour les intallées : **pip install scikit-learn matplotlib numpy praw urllib3**
 
 ## Utilisation
 1. Sur Visual Studio Code, ouvrir le projet *Python*.
