@@ -1,5 +1,5 @@
 # Correction de G. Poux-Médard, 2021-2022
-
+#from DesignPattern import *
 from Classes import Author
 from Classes_filles import RedditDocument, ArxivDocument
  
