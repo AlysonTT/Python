@@ -2,7 +2,14 @@ class Selection:
     def __init__(self):
         pass
 
-    #fonction qui permet d'avoir qu'un type de source selectionné
+    '''
+    Paramètres :
+        - index : l index du type de source à conserver sélectionné.
+        - variables : la liste des variables associées aux types de source.
+        
+    Permet d'avoir qu'un seul type de source sélectionné en décochant les autres.
+    Algorithme : Parcourt les variables associées aux types de source et les décoche sauf celle à l'index spécifié.
+    '''
     def selection_unique(self, index, variables):
         for i, var in enumerate(variables):
             if i != index:

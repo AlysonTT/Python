@@ -12,8 +12,23 @@ class Affichage:
     def __init__(self):
         # Initialiser ici les éléments communs à toutes les fonctions d'affichage
         pass
-    
-    '''Affichage des Détails des Documents Sélectionnés''' 
+
+    '''
+    Affiche les détails des documents sélectionnés dans la zone de texte.
+
+    Paramètres : 
+        - corpus : L'objet corpus contenant les documents.
+        - zone_texte : Le widget de zone de texte dans lequel afficher les détails.
+        - numDoc : Le numéro du document à afficher. Attribut de la classe Document.
+        - vars_afficher : Un dictionnaire de variables associées aux boutons "Afficher" pour chaque document.
+
+    Algorithme :
+        Récupère le document associé au numDoc dans l'objet corpus.
+        Active la modification de la zone de texte.
+        Efface le contenu précédent de la zone de texte.
+        Récupère les documents sélectionnés en fonction des variables associées aux boutons "Afficher".
+        Affiche les détails des documents sélectionnés : le titre, l'auteur, la date, l'URL et le contenu du document.
+    '''
     def afficher_details_selectionnes(self, corpus, zone_texte, numDoc, vars_afficher):
         document = next(doc for doc in corpus.id2doc.values() if doc.numDoc == numDoc)
 
@@ -109,7 +124,29 @@ class Affichage:
         plt.tight_layout()
         plt.show()
    
-    '''Comparer deux documents'''
+    '''
+    Comparer deux documents sélectionnés dans le corpus en utilisant la similarité cosinus et affiche les détails de la comparaison.
+   
+    Paramètres : 
+        - corpus: L'objet corpus contenant les documents.
+        - zone_texte: La zone de texte où afficher les résultats.
+        - vars_afficher : un dictionnaire de variables associées aux boutons "Afficher" pour chaque document.
+        - vars_comparer: Dictionnaire de variables associées aux boutons “Comparer” pour chaque document.
+        - numDoc: L'identifiant unique du document sur lequel l'utilisateur a cliqué pour lancer la comparaison.
+    
+    Algorithme :
+        Récupère les documents sélectionnés en utilisant les identifiants uniques.
+        Initialise les variables pour les deux documents à comparer.
+        Utilise la méthode creer_vocabulaire de la classe Corpus pour obtenir le vocabulaire du corpus.
+        Transforme les documents en vecteurs sur le vocabulaire précédemment construit à l'aide de la similarité cosinus
+        Calcule la similarité entre les deux documents.
+        Récupère les indices des mots communs et les mots communs eux-mêmes.
+        Calcule le pourcentage de présence des mots communs dans chaque document.
+        Affiche la similarité et les informations détaillées pour chaque document.
+        Réinitialise tous les boutons de comparaison dans les variables associées.
+        Affiche un message d'erreur si le nombre de documents sélectionnés n'est pas exactement deux.
+        Désactive la modification de la zone de texte.           
+    '''
     def comparer_documents(self, corpus, zone_texte, vars_afficher, vars_comparer, numDoc):
         # Récupérer les documents sélectionnés en utilisant l'identifiant unique
         numeros_selectionnes = [doc for doc, var in vars_comparer.items() if var.get()]
