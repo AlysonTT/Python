@@ -196,7 +196,7 @@ class RechercheAnalyse:
                     bouton_comparer_doc = tk.Checkbutton(
                         zone_texte,
                         text="Comparer", variable=var_comparer, font=("Helvetica", 10),
-                        command=lambda doc=document: self.comparer_documents(corpus, zone_texte, vars_afficher, vars_comparer, doc.numDoc))
+                        command=lambda doc=document: affichage.comparer_documents(corpus, zone_texte, vars_afficher, vars_comparer, doc.numDoc))
                     bouton_comparer_doc.document = document
                     zone_texte.window_create(tk.END, window=bouton_comparer_doc)
                     zone_texte.insert(tk.END, "\n")
