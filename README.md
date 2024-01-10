@@ -13,7 +13,7 @@
 - matplotlib
 - numpy
 
-Commande pour les intallées : pip install scikit-learn matplotlib numpy
+Commande pour les intallées : **pip install scikit-learn matplotlib numpy**
 
 ## Utilisation
 1. Sur Visual Studio Code, ouvrir le projet *Python*.
