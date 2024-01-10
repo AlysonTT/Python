@@ -17,16 +17,33 @@ def selection_unique(index, variables):
         if i != index:
             var.set(0)
 
-#fonction pour savoir quel type est sélectionné
+'''
+Paramètres : 
+    - source : Liste des sources disponibles.
+    - variables : Liste de variables associées aux Checkbuttons.    
+
+Retourne les types de sources sélectionnés sous forme d'une chaîne, séparées par des virgules,
+sinon renvoie "null" si aucune source n'est sélectionnée.
+
+Algorithme : Utilise les variables des types de source pour identifier ceux qui sont sélectionnés.
+'''
 def checkbutton_selection(source, variables):
-    # Afficher les éléments sélectionnés
     options_selectionnees = [source[i] for i, var in enumerate(variables) if var.get()]
     if options_selectionnees:
         return ", ".join(options_selectionnees)
     else:
         return "null"
 
-#fonction pour savoir quels auteurs ont été sélectionné
+'''
+Paramètres:
+    listebox_auteurs : Listebox contenant les auteurs.
+
+Retourne les auteurs sélectionnés sous forme d'une chaîne, séparés par des virgules,
+sinon renvoie "null" si aucun auteur n'est sélectionné.
+
+Algorithme : Utilise la sélection actuelle dans la listebox des auteurs pour obtenir les auteurs sélectionnés.
+
+'''
 def auteurs_selection(listebox_auteurs):
     auteurs_selectionnes = [listebox_auteurs.get(i) for i in listebox_auteurs.curselection()]
     if auteurs_selectionnes:
@@ -34,13 +51,35 @@ def auteurs_selection(listebox_auteurs):
     else:
         return "null"
 
-#fonction pour deselectionner tous les auteurs quand on appuie sur un checkbutton
+'''
+Désélectionne tous les éléments de la listebox des auteurs et décoche le checkbutton associé.
+
+Paramètres :
+    - listebox_auteurs : Listebox contenant les auteurs.
+    - checkbutton_deselection : Checkbutton de désélection.
+
+Algorithme : Utilise les méthodes appropriées pour déselectionner tous les éléments et mettre à jour l'état du checkbutton.
+
+'''
 def deselectionner_tous_les_auteurs(listebox_auteurs, checkbutton_deselection):
     # Désélectionne tous les éléments de la listebox
     listebox_auteurs.selection_clear(0, tk.END)
     # On met l'état du checkbutton en non coché
     checkbutton_deselection.deselect()
-    
+ 
+'''
+Vérifie si une date est valide.
+
+Paramètres : 
+    - annee : Année à vérifier.
+    - mois : Mois à vérifier.
+    - jour : Jour à vérifier.
+
+Retourne True si la date est valide, False sinon.
+
+Algorithme : Vérifie si l'année est entre 1900 et 2024, le mois entre 1 et 12, et le jour en fonction du mois (prend en compte les années bissextiles).
+
+'''   
 #fonction pour vérifier qu'une date est valide
 def est_date_valide(annee, mois, jour):
     # Vérification de l'année (entre 1900 et 2024)
@@ -402,6 +441,17 @@ def comparer_documents(corpus, zone_texte, vars_afficher, vars_comparer, numDoc)
     zone_texte.config(state=tk.DISABLED)  # Désactive la possibilité d'éditer la zone de texte
       
 '''Section 6 : Clear les boutons pour afficher ou comparer'''
+'''
+Désélectionne tous les boutons associés aux variables d'affichage et de comparaison.
+
+Paramètres :
+    - vars_afficher : Dictionnaire de variables associées aux boutons d'affichage.
+    - vars_comparer : Dictionnaire de variables associées aux boutons de comparaison.
+    
+Algorithme :
+Parcourt toutes les variables associées aux boutons d'affichage et les désélectionne.
+Parcourt toutes les variables associées aux boutons de comparaison et les désélectionne.
+'''
 def clear_tous_les_boutons(vars_afficher, vars_comparer):
     for var_afficher in vars_afficher.values():
         var_afficher.set(0)
