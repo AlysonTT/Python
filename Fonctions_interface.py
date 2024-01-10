@@ -6,66 +6,14 @@ from sklearn.metrics.pairwise import cosine_similarity
 import matplotlib.pyplot as plt
 import re
 
+from Selection import Selection
+selection = Selection()
+from Deselection import Deselection
+deselection = Deselection()
 '''Section 1 : Fonctions Utilitaires'''
 '''Cette section regroupe plusieurs fonctions utilitaires 
 qui facilitent la gestion des sélections d'utilisateurs, 
 la validation des dates et des auteurs, etc.'''
-#fonction qui permet d'avoir qu'un type de source selectionné
-def selection_unique(index, variables):
-    for i, var in enumerate(variables):
-        if i != index:
-            var.set(0)
-
-'''
-Paramètres : 
-    - source : Liste des sources disponibles.
-    - variables : Liste de variables associées aux Checkbuttons.    
-
-Retourne les types de sources sélectionnés sous forme d'une chaîne, séparées par des virgules,
-sinon renvoie "null" si aucune source n'est sélectionnée.
-
-Algorithme : Utilise les variables des types de source pour identifier ceux qui sont sélectionnés.
-'''
-def checkbutton_selection(source, variables):
-    options_selectionnees = [source[i] for i, var in enumerate(variables) if var.get()]
-    if options_selectionnees:
-        return ", ".join(options_selectionnees)
-    else:
-        return "null"
-
-'''
-Paramètres:
-    listebox_auteurs : Listebox contenant les auteurs.
-
-Retourne les auteurs sélectionnés sous forme d'une chaîne, séparés par des virgules,
-sinon renvoie "null" si aucun auteur n'est sélectionné.
-
-Algorithme : Utilise la sélection actuelle dans la listebox des auteurs pour obtenir les auteurs sélectionnés.
-
-'''
-def auteurs_selection(listebox_auteurs):
-    auteurs_selectionnes = [listebox_auteurs.get(i) for i in listebox_auteurs.curselection()]
-    if auteurs_selectionnes:
-        return ", ".join(auteurs_selectionnes)
-    else:
-        return "null"
-
-'''
-Désélectionne tous les éléments de la listebox des auteurs et décoche le checkbutton associé.
-
-Paramètres :
-    - listebox_auteurs : Listebox contenant les auteurs.
-    - checkbutton_deselection : Checkbutton de désélection.
-
-Algorithme : Utilise les méthodes appropriées pour déselectionner tous les éléments et mettre à jour l'état du checkbutton.
-
-'''
-def deselectionner_tous_les_auteurs(listebox_auteurs, checkbutton_deselection):
-    # Désélectionne tous les éléments de la listebox
-    listebox_auteurs.selection_clear(0, tk.END)
-    # On met l'état du checkbutton en non coché
-    checkbutton_deselection.deselect()
- 
 '''
 Vérifie si une date est valide.
 
@@ -129,10 +77,10 @@ def effectuer_recherche(corpus, zone_texte, mots_clefs, date, source, variables,
         messagebox.showerror("Erreur", "Veuillez entrer une date.")
 
     #Recuperer le type de source selectionne
-    type = checkbutton_selection(source, variables)
+    type = selection.checkbutton_selection(source, variables)
 
     #Recuperer les auteurs selectionnes
-    auteurs = auteurs_selection(listebox_auteurs) 
+    auteurs = selection.auteurs_selection(listebox_auteurs) 
 
     #liste des auteurs selectionne avec un autre format
     liste_auteurs_choisi = auteurs.split(',')
@@ -347,7 +295,7 @@ def comparer_documents(corpus, zone_texte, vars_afficher, vars_comparer, numDoc)
                 zone_texte.insert(tk.END, f"{document1.titre} : {pour_document1:.2f} %\n")
                 zone_texte.insert(tk.END, f"{document2.titre} : {pour_document2:.2f} %\n\n")
         
-        clear_tous_les_boutons(vars_afficher, vars_comparer)
+        deselection.clear_tous_les_boutons(vars_afficher, vars_comparer)
         # Réinitialiser les variables de comparaison
         vars_comparer = {}
         
@@ -359,25 +307,6 @@ def comparer_documents(corpus, zone_texte, vars_afficher, vars_comparer, numDoc)
         messagebox.showwarning("Erreur", "Vous avez sélectionné plus de deux documents. Veuillez en choisir seulement deux.")
 
     zone_texte.config(state=tk.DISABLED)  # Désactive la possibilité d'éditer la zone de texte
-      
-'''Section 4 : Clear les boutons pour afficher ou comparer'''
-'''
-Désélectionne tous les boutons associés aux variables d'affichage et de comparaison.
-
-Paramètres :
-    - vars_afficher : Dictionnaire de variables associées aux boutons d'affichage.
-    - vars_comparer : Dictionnaire de variables associées aux boutons de comparaison.
-    
-Algorithme :
-Parcourt toutes les variables associées aux boutons d'affichage et les désélectionne.
-Parcourt toutes les variables associées aux boutons de comparaison et les désélectionne.
-'''
-def clear_tous_les_boutons(vars_afficher, vars_comparer):
-    for var_afficher in vars_afficher.values():
-        var_afficher.set(0)
-
-    for var_comparer in vars_comparer.values():
-        var_comparer.set(0)
     
 '''Section 5 : Mesurer le corpus'''   
 def mesure_corpus(corpus, zone_texte):

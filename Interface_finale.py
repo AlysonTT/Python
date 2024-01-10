@@ -45,6 +45,10 @@ ESSAI
 '''
 from Affichage import Affichage
 affichage = Affichage()
+from Selection import Selection
+selection = Selection()
+from Deselection import Deselection
+deselection = Deselection()
 
 '''Section 5 : Création de la fenêtre avec ses différents éléments'''
 # Créer une nouvelle fenêtre Tkinter
@@ -108,8 +112,8 @@ variables = [tk.IntVar() for _ in source]
 
 # Créer les Checkbuttons et les ajouter au sous-cadre
 for i, option in enumerate(source):
-    from Fonctions_interface import selection_unique
-    checkbutton = tk.Checkbutton(cadre_sources, text=option, variable=variables[i], command=lambda i=i: selection_unique(i, variables))
+    #from Fonctions_interface import selection_unique
+    checkbutton = tk.Checkbutton(cadre_sources, text=option, variable=variables[i], command=lambda i=i: selection.selection_unique(i, variables))
     checkbutton.grid(row=1, column=i, padx=5, pady=5)
 
 # Espace pour sélectionner un ou plusieurs auteurs
@@ -126,8 +130,8 @@ for auteur in liste_auteurs:
 listebox_auteurs.grid(row=1, column=1, padx=5, pady=10, sticky="nsew")
     
 # Checkbutton pour désélectionner tous les auteurs
-from Fonctions_interface import deselectionner_tous_les_auteurs
-checkbutton_deselection = tk.Checkbutton(cadre_auteurs, text="Désélectionner tous les auteurs", command=lambda: deselectionner_tous_les_auteurs(listebox_auteurs, checkbutton_deselection))
+#from Fonctions_interface import deselectionner_tous_les_auteurs
+checkbutton_deselection = tk.Checkbutton(cadre_auteurs, text="Désélectionner tous les auteurs", command=lambda: deselection.deselectionner_tous_les_auteurs(listebox_auteurs, checkbutton_deselection))
 checkbutton_deselection.grid(row=2, column=1, pady=5)
 
 # Barre de défilement pour la Listebox
@@ -159,8 +163,8 @@ bouton_afficher_corpus = Button(cadre_boutons_options, text="Afficher Tout le Co
 bouton_afficher_corpus.grid(row=0, column=4, padx=5)
 
 # Ajoutez cette ligne dans la création du cadre_boutons
-from Fonctions_interface import clear_tous_les_boutons
-bouton_clear = Button(cadre_boutons_options, text="Clear", command=lambda: clear_tous_les_boutons(checkbutton_vars_afficher, checkbutton_vars_comparer))
+#from Fonctions_interface import clear_tous_les_boutons
+bouton_clear = Button(cadre_boutons_options, text="Clear", command=lambda: deselection.clear_tous_les_boutons(checkbutton_vars_afficher, checkbutton_vars_comparer))
 bouton_clear.grid(row=1, column=2, padx=5)
 
 from Fonctions_interface import mesure_corpus
