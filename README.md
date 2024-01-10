@@ -13,6 +13,7 @@
 ### Bibliothéques inclus avec Python
 - tkinter : pour l'interface graphique et notamment sa simplicité d'utilisation et son intégration harmonieuse avec notre projet.
 - pickle : pour le chargement du corpus à partir de "corpus.plk".
+- re : pour gerer les expressions régulières.
   
 ### Bibliothéques à installer
 - scikit-learn : afin de réaliser et simplifier l'analyse des donnée et les différents calcul nécessaire ua bon focntionnement des options proposées.
