@@ -97,7 +97,21 @@ class Affichage:
         # Activer la modification de la zone de texte
         zone_texte.config(state=tk.DISABLED)
 
-    '''Visualiser la distribution'''
+    '''
+    Visualise la distribution TFxIDF pour un mot donné dans le corpus.
+    
+    Paramètres : 
+        - mot : Mot pour lequel visualiser la distribution TFxIDF.
+        - vocabulaire : Liste triée des mots du vocabulaire du corpus.
+        - mat_TFxIDF : Matrice TFxIDF du corpus.  
+
+    Algorithme :
+        Trouve l'indice du mot dans le vocabulaire.
+        Initialise une figure pour les graphiques.
+        Créer un histogramme pour le mot en utilisant la distribution TFxIDF  du corpus.
+        Affiche le titre, les labels des axes, et ajuste la mise en page.
+        Affiche le graphique.
+    '''
     def visualiser_distribution(self, mot, vocabulaire, mat_TFxIDF):
         # Trouver l'indice du mot dans le vocabulaire
         mot_index = vocabulaire.index(mot)
