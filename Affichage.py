@@ -59,18 +59,11 @@ class Affichage:
         #deselectionne le check du type si active
         checkbutton.deselect()
 
-        '''AJOUTER'''
+        #initialisation
         boutons_par_document = {}
-
-        # Débogage
-        print("Valeurs de checkbutton_vars_afficher avant la boucle for :", [var.get() for var in vars_afficher.values()])
-        print("Valeurs de checkbutton_vars_comparer avant la boucle for :", [var.get() for var in vars_comparer.values()])
-
-        '''AJOUTER'''
 
         # Etape 2 : Afficher l'ensemble du corpus    
         for document in corpus.id2doc.values():
-            ''''AJOUTER'''
             zone_texte.insert(tk.END, f"Titre du document : {document.titre}\n", "gras")
             zone_texte.insert(tk.END, f"Auteurs du document : {document.auteur}\n")
 
@@ -93,14 +86,13 @@ class Affichage:
             zone_texte.insert(tk.END, "\n")
 
             boutons_par_document[document] = (var_afficher, var_comparer)
-            '''AJOUTER'''
 
-        '''AJOUTER'''
+        '''On met à jour'''
         vars_afficher.update({doc.numDoc: var_afficher for doc, (var_afficher, _) in boutons_par_document.items()})
         vars_comparer.update({doc.numDoc: var_comparer for doc, (_, var_comparer) in boutons_par_document.items()})
         vars_afficher.update({doc.numDoc: var_afficher for doc, (var_afficher, _) in boutons_par_document.items()})
         vars_comparer.update({doc.numDoc: var_comparer for doc, (_, var_comparer) in boutons_par_document.items()})
-        '''AJOUTER'''
+
 
         # Activer la modification de la zone de texte
         zone_texte.config(state=tk.DISABLED)
@@ -117,8 +109,8 @@ class Affichage:
 
         # Créer un histogramme pour le mot
         plt.hist(np.array(tfidf_corpus), bins=30, edgecolor='black')
-        plt.title(f'Distribution TD-IDF pour le mot "{mot}"')
-        plt.xlabel('Valeurs TD-IDF')
+        plt.title(f'Distribution TFxIDF pour le mot "{mot}"')
+        plt.xlabel('Valeurs TFxIDF')
         plt.ylabel('Fréquence')
 
         plt.tight_layout()

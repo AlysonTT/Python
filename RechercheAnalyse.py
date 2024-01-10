@@ -136,9 +136,8 @@ class RechercheAnalyse:
         zone_texte.config(state=tk.NORMAL)
         zone_texte.delete(1.0, tk.END)
 
-        '''AJOUTER'''
+        '''Initialise la variable'''
         boutons_par_document = {}
-        '''AJOUTER'''
 
         # Afficher les trois meilleurs résultats (avec score non nul)
         if not documents_retrouves:
@@ -190,7 +189,7 @@ class RechercheAnalyse:
 
                     zone_texte.insert(tk.END, f"Score de similarité: {score_document}\n")
                     
-                    '''AJOUTER'''
+                    #Espace pour les boutons "Afficher" et "Comparer"
                     var_afficher = tk.IntVar()                    
 
                     var_comparer = tk.IntVar()
@@ -201,57 +200,55 @@ class RechercheAnalyse:
                     bouton_comparer_doc.document = document
                     zone_texte.window_create(tk.END, window=bouton_comparer_doc)
                     zone_texte.insert(tk.END, "\n")
-                    '''AJOUTER'''
                     
                     zone_texte.insert(tk.END, "=" * 150 + "\n")
                     meilleur_resultat_affiche += 1
 
-                    '''AJOUTER'''
                     boutons_par_document[document] = (var_afficher, var_comparer)
-                    '''AJOUTER'''
-            '''AJOUTER'''
+                    
+            '''On met a jour les deux listes des boutons'''
             vars_afficher.update({doc.numDoc: var_afficher for doc, (var_afficher, _) in boutons_par_document.items()})
             vars_comparer.update({doc.numDoc: var_comparer for doc, (_, var_comparer) in boutons_par_document.items()})
-            '''AJOUTER'''
 
             # Désactiver la modification de la zone de texte
             zone_texte.config(state=tk.DISABLED)
 
-    '''Mesurer le corpus'''   
+    '''Mesurer le corpus''' 
     def mesure_corpus(self, corpus, zone_texte):
-            zone_texte.config(state=tk.NORMAL)
+        zone_texte.config(state=tk.NORMAL)
 
-            # Utiliser la matrice TF-IDF du corpus pour la transformation
-            _, _, vocabulaire_corpus, _, _, mat_TFxIDF_corpus = corpus.creer_vocabulaire()
+        # Utiliser la matrice TF-IDF du corpus pour la transformation
+        _, _, vocabulaire_corpus, _, _, mat_TFxIDF_corpus = corpus.creer_vocabulaire()
 
-            # Trier le vocabulaire une fois
-            vocabulaire_corpus_trie = sorted(vocabulaire_corpus, key=lambda mot: (not mot.isdigit(), int(mot) if mot.isdigit() else mot.lower()))
+        # Trier le vocabulaire une fois
+        vocabulaire_corpus_trie = sorted(vocabulaire_corpus, key=lambda mot: (not mot.isdigit(), int(mot) if mot.isdigit() else mot.lower()))
 
-            # Transformer les documents en vecteurs TF-IDF (utiliser un sous-ensemble de documents si nécessaire)
-            corpus_texte_nettoye = [corpus.nettoyer_texte(doc.texte) for doc in list(corpus.id2doc.values())[:100]]  # Limiter à 100 documents
-            vectorizer = TfidfVectorizer(vocabulary=vocabulaire_corpus_trie, use_idf=False)
-            corpus_vecteur = vectorizer.fit_transform(corpus_texte_nettoye)
+        # Transformer les documents en vecteurs TF-IDF (utiliser un sous-ensemble de documents si nécessaire)
+        corpus_texte_nettoye = [corpus.nettoyer_texte(doc.texte) for doc in list(corpus.id2doc.values())[:100]]  # Limiter à 100 documents
+        vectorizer = TfidfVectorizer(vocabulary=vocabulaire_corpus_trie, use_idf=False)
+        corpus_vecteur = vectorizer.fit_transform(corpus_texte_nettoye)
 
-            zone_texte.config(state=tk.NORMAL)
-            zone_texte.delete(1.0, tk.END)
+        zone_texte.config(state=tk.NORMAL)
+        zone_texte.delete(1.0, tk.END)
 
-            # Afficher la mesure TDxIDF pour chaque mot du corpus dans la zone de texte
-            zone_texte.insert(tk.END, "Mesure TDxIDF pour chaque mot du corpus :\n\n")
-            for mot, indice in zip(vocabulaire_corpus_trie, range(len(vocabulaire_corpus_trie))):
-                tfidf_corpus = mat_TFxIDF_corpus[:, indice].tolist()
-                
-                # Ajouter le mot au texte (en bleu et souligné)
-                zone_texte.tag_configure(f"bleu_souligne_{indice}", foreground="blue", underline=True)
-                zone_texte.insert(tk.END, f"Mot : {mot}\n", "gras")
-                # Ajouter le mot au texte (en lien pour la visualisation)
-                zone_texte.tag_configure(f"visualisation_mot_{indice}", foreground="blue", underline=True)
-                zone_texte.insert(tk.END, "Visualiser la distribution\n", f"visualisation_mot_{indice}")
-                zone_texte.tag_bind(f"visualisation_mot_{indice}", "<Button-1>", lambda mot=mot: affichage.visualiser_distribution(mot, vocabulaire_corpus_trie, mat_TFxIDF_corpus))
+        # Afficher la mesure TDxIDF pour chaque mot du corpus dans la zone de texte
+        zone_texte.insert(tk.END, "Mesure TDxIDF pour chaque mot du corpus :\n\n")
+        for mot, indice in zip(vocabulaire_corpus_trie, range(len(vocabulaire_corpus_trie))):
+            tfidf_corpus = mat_TFxIDF_corpus[:, indice].tolist()
+            
+            # Ajouter le mot au texte (en bleu et souligné)
+            zone_texte.tag_configure(f"bleu_souligne_{indice}", foreground="blue", underline=True)
+            zone_texte.insert(tk.END, f"Mot : {mot}\n", "gras")
 
-                zone_texte.insert(tk.END, f"Corpus - TDxIDF : {tfidf_corpus}\n\n")
+            # Ajouter le mot au texte (en lien pour la visualisation)
+            zone_texte.tag_configure(f"visualisation_mot_{indice}", foreground="blue", underline=True)
+            zone_texte.insert(tk.END, "Visualiser la distribution\n", f"visualisation_mot_{indice}")
+            zone_texte.tag_bind(f"visualisation_mot_{indice}", "<Button-1>", lambda event, mot=mot: affichage.visualiser_distribution(mot, vocabulaire_corpus_trie, mat_TFxIDF_corpus))
 
-            zone_texte.config(state=tk.DISABLED)
-    
+            zone_texte.insert(tk.END, f"Corpus - TFxIDF : {tfidf_corpus}\n\n")
+
+        zone_texte.config(state=tk.DISABLED)
+
     '''Généner la frise temporelle d'un mot'''
     def generer_frise_temporelle(self, corpus, entry_mot_temporel):
         if entry_mot_temporel.get():
