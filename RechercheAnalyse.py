@@ -57,7 +57,7 @@ class RechercheAnalyse:
         #mots-cles entrez dans le champ texte
         mots_clefs = mots_clefs.get().split()
         
-        #date entrez dans le champ texte
+        #date entrée dans le champ texte
         date_entre = date.get().strip()
 
         # Vérifier qu'il y a un seul mot
@@ -78,16 +78,16 @@ class RechercheAnalyse:
             # Afficher un message d'erreur si la date n'est pas dans le bon format
             messagebox.showerror("Erreur", "Veuillez entrer une date.")
 
-        #Recuperer le type de source selectionne
+        #Recupere le type de source selectionne
         type = selection.checkbutton_selection(source, variables)
 
-        #Recuperer les auteurs selectionnes
+        #Recupere les auteurs selectionnes
         auteurs = selection.auteurs_selection(listebox_auteurs) 
 
         #liste des auteurs selectionne avec un autre format
         liste_auteurs_choisi = auteurs.split(',')
 
-        # Utiliser la méthode creer_vocabulaire pour obtenir le vocabulaire
+        # Utilise la méthode creer_vocabulaire pour obtenir le vocabulaire
         _, _, vocabulaire_corpus, _, _, _ = corpus.creer_vocabulaire()
 
         # Etape 2 : transformer ces mots-clefs sous la forme d’un vecteur sur le vocabulaire précédemment construit
@@ -99,7 +99,7 @@ class RechercheAnalyse:
         corpus_vecteur = vectorizer.transform(corpus_texte)
         similarite = cosine_similarity(corpus_vecteur, mots_clefs_vecteur).flatten()
 
-        # Afficher les documents qui contiennent au moins un mot-clé avec le score de similarité
+        # Affiche les documents qui contiennent au moins un mot-clé avec le score de similarité
         documents_retrouves = []
         for document, score_document in zip(corpus.id2doc.values(), similarite):
             mots_trouves_texte = all(mot.lower() in document.texte.lower() for mot in mots_clefs)
@@ -110,7 +110,7 @@ class RechercheAnalyse:
             #lise des auteurs du document
             liste_auteurs_doc = document.auteur.split(',')
             
-            # Supprimer les espaces avant et après chaque nom dans les deux listes
+            # Supprime les espaces avant et après chaque nom dans les deux listes
             liste_auteurs_choisi = [auteur.strip() for auteur in liste_auteurs_choisi]
             liste_auteurs_doc = [auteur.strip() for auteur in liste_auteurs_doc]
 
@@ -129,17 +129,17 @@ class RechercheAnalyse:
                     if type_auteur==True and (type == "null" or type.lower() in document.url.lower()) and (document.date == date_entre or len(date_entre)==0):
                         documents_retrouves.append((document, score_document))
 
-        # Trier les résultats par score de similarité
+        # Trie les résultats par score de similarité
         documents_retrouves.sort(key=lambda x: x[1], reverse=True)
 
-        # Effacer le contenu précédent du widget de texte
+        # Efface le contenu précédent du widget de texte
         zone_texte.config(state=tk.NORMAL)
         zone_texte.delete(1.0, tk.END)
 
         '''Initialise la variable'''
         boutons_par_document = {}
 
-        # Afficher les trois meilleurs résultats (avec score non nul)
+        # Affiche les trois meilleurs résultats (avec score non nul)
         if not documents_retrouves:
             zone_texte.insert(tk.END, "Aucun résultat trouvé dans le corpus.")
         else:
@@ -210,20 +210,20 @@ class RechercheAnalyse:
             vars_afficher.update({doc.numDoc: var_afficher for doc, (var_afficher, _) in boutons_par_document.items()})
             vars_comparer.update({doc.numDoc: var_comparer for doc, (_, var_comparer) in boutons_par_document.items()})
 
-            # Désactiver la modification de la zone de texte
+            # Désactive la modification de la zone de texte
             zone_texte.config(state=tk.DISABLED)
 
     '''Mesurer le corpus''' 
     def mesure_corpus(self, corpus, zone_texte):
         zone_texte.config(state=tk.NORMAL)
 
-        # Utiliser la matrice TF-IDF du corpus pour la transformation
+        # Utilise la matrice TF-IDF du corpus pour la transformation
         _, _, vocabulaire_corpus, _, _, mat_TFxIDF_corpus = corpus.creer_vocabulaire()
 
-        # Trier le vocabulaire une fois
+        # Trie le vocabulaire une fois
         vocabulaire_corpus_trie = sorted(vocabulaire_corpus, key=lambda mot: (not mot.isdigit(), int(mot) if mot.isdigit() else mot.lower()))
 
-        # Transformer les documents en vecteurs TF-IDF (utiliser un sous-ensemble de documents si nécessaire)
+        # Transforme les documents en vecteurs TF-IDF (utiliser un sous-ensemble de documents si nécessaire)
         corpus_texte_nettoye = [corpus.nettoyer_texte(doc.texte) for doc in list(corpus.id2doc.values())[:100]]  # Limiter à 100 documents
         vectorizer = TfidfVectorizer(vocabulary=vocabulaire_corpus_trie, use_idf=False)
         corpus_vecteur = vectorizer.fit_transform(corpus_texte_nettoye)
@@ -231,16 +231,16 @@ class RechercheAnalyse:
         zone_texte.config(state=tk.NORMAL)
         zone_texte.delete(1.0, tk.END)
 
-        # Afficher la mesure TDxIDF pour chaque mot du corpus dans la zone de texte
+        # Affiche la mesure TDxIDF pour chaque mot du corpus dans la zone de texte
         zone_texte.insert(tk.END, "Mesure TDxIDF pour chaque mot du corpus :\n\n")
         for mot, indice in zip(vocabulaire_corpus_trie, range(len(vocabulaire_corpus_trie))):
             tfidf_corpus = mat_TFxIDF_corpus[:, indice].tolist()
             
-            # Ajouter le mot au texte (en bleu et souligné)
+            # Ajoute le mot au texte (en bleu et souligné)
             zone_texte.tag_configure(f"bleu_souligne_{indice}", foreground="blue", underline=True)
             zone_texte.insert(tk.END, f"Mot : {mot}\n", "gras")
 
-            # Ajouter le mot au texte (en lien pour la visualisation)
+            # Ajoute le mot au texte (en lien pour la visualisation)
             zone_texte.tag_configure(f"visualisation_mot_{indice}", foreground="blue", underline=True)
             zone_texte.insert(tk.END, "Visualiser la distribution\n", f"visualisation_mot_{indice}")
             zone_texte.tag_bind(f"visualisation_mot_{indice}", "<Button-1>", lambda event, mot=mot: affichage.visualiser_distribution(mot, vocabulaire_corpus_trie, mat_TFxIDF_corpus))
@@ -254,7 +254,7 @@ class RechercheAnalyse:
         if entry_mot_temporel.get():
             mot_recherche = entry_mot_temporel.get()
 
-            # Vérifier qu'il y a un seul mot
+            # Vérifie qu'il y a un seul mot
             mots = mot_recherche.strip().split()
             
             if len(mots) == 1:

@@ -19,10 +19,13 @@
 - scikit-learn : afin de réaliser et simplifier l'analyse des donnée et les différents calcul nécessaire ua bon focntionnement des options proposées.
 - matplotlib : permet la representation des différents graquiques une fois les différents traitement des données rélisé.
 - numpy : très utile pour le travail sur les tableaux multidimensionnels.
+- panda : pour la manipulation des données.
+- scipy : pour le calcul de la matrice creuse.
+- xmltodict : simplifier le traitement des documents XML en Python.
 - praw : est utilisé spécifiquement pour interagir avec l'API de Reddit.
 - urllib : pour travailler avec des ressources web tel que les URLs.
 
-Commande pour les intallées : **pip install scikit-learn matplotlib numpy praw urllib3**
+Commande pour les intallées : **pip install pandas scikit-learn matplotlib numpy praw urllib3 scipy xmltodict**
 
 ## Utilisation
 1. Sur Visual Studio Code, ouvrir le projet *Python*.

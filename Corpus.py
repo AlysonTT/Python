@@ -12,6 +12,7 @@ from sklearn.feature_extraction.text import TfidfTransformer
 # =============== 2.7 : CLASSE CORPUS ===============
 #@singleton
 class Corpus:
+    #Constucteur, intialisation des attributs
     def __init__(self, nom):
         self.nom = nom
         self.authors = {}
@@ -20,6 +21,7 @@ class Corpus:
         self.ndoc = 0
         self.naut = 0
 
+    #Fonction pour ajouter un document au corpus
     def add(self, doc):
         if doc.auteur not in self.aut2id:
             self.naut += 1
@@ -31,6 +33,7 @@ class Corpus:
         self.id2doc[self.ndoc] = doc
 
 # =============== 2.8 : REPRESENTATION ===============
+    # Fonction pour afficher les documents du corpus
     def show(self, n_docs=-1, tri="abc"):
         docs = list(self.id2doc.values())
         if tri == "abc":  # Tri alphabétique
@@ -50,6 +53,7 @@ class Corpus:
         #de base dans la correction
         print("\n".join(list(map(repr, docs))))
 
+    # Fonction pour obtenir une représentation de l'objet
     def __repr__(self):
         docs = list(self.id2doc.values())
         docs = list(sorted(docs, key=lambda x: x.titre.lower()))
@@ -122,8 +126,7 @@ class Corpus:
         #utiliser pour créer le dictionnaire des mots avec mat_TF pour le remplir
         vocab_mat_TF = {}
 
-        
-        # Parcourir tous les documents du corpus
+        # Parcour tous les documents du corpus
         for doc in self.id2doc.values():
             #nettoyage du texte avant de chercher les futurs mots du vocabulaire
             texte_nettoye = self.nettoyer_texte(doc.texte)
@@ -188,7 +191,6 @@ class Corpus:
         return vocab, vocab_mat_TF, list(vocabulaire), freq, mat_TF, mat_TFxIDF
     
      #Fonction pour avoir les informations temporelle d'un mot
-
     def extraire_informations_temporelles(self, mot_recherche):
         informations_temporelles = {}
 
