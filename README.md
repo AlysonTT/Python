@@ -10,17 +10,17 @@
 
 ## Bibliothèques
 
-### Bibliothéques inclus avec Python
+### Bibliothèques inclus avec Python
 - tkinter : pour l'interface graphique et notamment sa simplicité d'utilisation et son intégration harmonieuse avec notre projet.
 - pickle : pour le chargement du corpus à partir de "corpus.plk".
-- re : pour gerer les expressions régulières.
+- re : pour gérer les expressions régulières.
   
-### Bibliothéques à installer
-- scikit-learn : afin de réaliser et simplifier l'analyse des donnée et les différents calcul nécessaire ua bon focntionnement des options proposées.
-- matplotlib : permet la representation des différents graquiques une fois les différents traitement des données rélisé.
-- numpy : très utile pour le travail sur les tableaux multidimensionnels.
+### Bibliothèques à installer
+- scikit-learn : afin de réaliser et simplifier l'analyse des données ainsi que les différents calculs nécessaires au bon fonctionnement des options proposées.
+- matplotlib : permet la représentation des différents graphiques une fois les différents traitements des données réalisés.
+- numpy : est très utile pour le travail sur les tableaux multidimensionnels.
 - praw : est utilisé spécifiquement pour interagir avec l'API de Reddit.
-- urllib : pour travailler avec des ressources web tel que les URLs.
+- urllib : est utilisé pour travailler avec des ressources web telles que les URLs.
 
 Commande pour les intallées : **pip install scikit-learn matplotlib numpy praw urllib3**
 
