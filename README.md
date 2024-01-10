@@ -9,11 +9,11 @@
 - VIVIER Maude
 
 ## Bibliothèques à installées
-- scikit-learn
-- matplotlib
-- numpy
-- tkinter
-- pickle
+- scikit-learn : afin de réaliser et simplifier l'analyse des donnée et les différents calcul nécessaire ua bon focntionnement des options proposées.
+- matplotlib : permet la representation des différents graquiques une fois les différents traitement des données rélisé.
+- numpy : très utile pour le travail sur les tableaux multidimensionnels.
+- tkinter : pour l'interface graphique et notamment sa simplicité d'utilisation et son intégration harmonieuse avec notre projet.
+- pickle : pour le chargement du corpus à partir de "corpus.plk".
 
 Commande pour les intallées : **pip install scikit-learn matplotlib numpy tkinter pickle**
 
