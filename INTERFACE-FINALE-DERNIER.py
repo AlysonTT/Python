@@ -1,3 +1,6 @@
+
+'''Section 1: Importation des bibliothèques'''
+
 import tkinter as tk
 from tkinter import Text, Scrollbar, Entry, Button, Label, messagebox
 from sklearn.feature_extraction.text import CountVectorizer
@@ -15,9 +18,13 @@ try:
 except ImportError:
     print("Échec de l'importation du module Corpus.")
 
+'''Section 2: Chargement du corpus'''
+
 # Charger le corpus depuis le fichier
 with open("corpus.pkl", "rb") as f:
     corpus = pickle.load(f)
+
+'''Section 3: Initialisation'''
 
 # Liste des auteurs utilisés pour le afficher dans la fenetre
 liste_auteurs = set()
@@ -39,6 +46,12 @@ for auteur, index in corpus.aut2id.items():
 
 # Convertir l'ensemble en une liste triée
 liste_auteurs = sorted(list(liste_auteurs))
+
+'''Section 4 : Fonctions Utilitaires'''
+
+'''Cette section regroupe plusieurs fonctions utilitaires 
+qui facilitent la gestion des sélections d'utilisateurs, 
+la validation des dates et des auteurs, etc.'''
 
 #fonction qui permet d'avoir qu'un type de source selectionné
 def selection_unique(index):
@@ -91,6 +104,8 @@ def est_date_valide(annee, mois, jour):
         return False
 
     return True
+
+'''Section 5: Fonction de recherche '''
 
 #fonction pour effectuer une recherche avec des mots-clés
 #un type de source ou des auteurs spécifiés ou non  
@@ -270,6 +285,9 @@ def effectuer_recherche():
         zone_texte.config(state=tk.DISABLED)
 
 '''AJOUTER'''
+
+'''Section 6 : Affichage des Détails des Documents Sélectionnés'''
+
 def afficher_details_selectionnes(corpus, checkbutton_vars_afficher, zone_texte, numDoc):
     document = next(doc for doc in corpus.id2doc.values() if doc.numDoc == numDoc)
 
@@ -291,6 +309,8 @@ def afficher_details_selectionnes(corpus, checkbutton_vars_afficher, zone_texte,
     # Désactiver la modification de la zone de texte
     zone_texte.config(state=tk.DISABLED)
 '''AJOUTER'''
+
+'''Section 7 : Affichage du Corpus dans son intégralité'''
 
 def afficher_corpus():
     # Etape 1 : Effacer le contenu précédent du widget de texte
