@@ -163,7 +163,8 @@ from Fonctions_interface import clear_tous_les_boutons
 bouton_clear = Button(cadre_boutons_options, text="Clear", command=lambda: clear_tous_les_boutons(checkbutton_vars_afficher, checkbutton_vars_comparer))
 bouton_clear.grid(row=1, column=2, padx=5)
 
-bouton_mesure = Button(cadre_boutons_options, text="Mesure du corpus", command=lambda: affichage.mesure_corpus(corpus, zone_texte))
+from Fonctions_interface import mesure_corpus
+bouton_mesure = Button(cadre_boutons_options, text="Mesure du corpus", command=lambda: mesure_corpus(corpus, zone_texte))
 bouton_mesure.grid(row=1, column=3, padx=5)
 
 

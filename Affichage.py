@@ -1,5 +1,4 @@
 import tkinter as tk
-from sklearn.feature_extraction.text import TfidfVectorizer
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -8,7 +7,8 @@ class Affichage:
     def __init__(self):
         # Initialiser ici les éléments communs à toutes les fonctions d'affichage
         pass
-
+    
+    '''Affichage des Détails des Documents Sélectionnés''' 
     def afficher_details_selectionnes(self, corpus, zone_texte, numDoc, vars_afficher):
         document = next(doc for doc in corpus.id2doc.values() if doc.numDoc == numDoc)
 
@@ -30,6 +30,7 @@ class Affichage:
         # Désactiver la modification de la zone de texte
         zone_texte.config(state=tk.DISABLED)
         
+    '''Affichage du Corpus dans son intégralité'''
     def afficher_corpus(self, corpus, zone_texte, checkbutton, vars_afficher, vars_comparer):
         # Etape 1 : Effacer le contenu précédent du widget de texte
         zone_texte.config(state=tk.NORMAL)
@@ -83,7 +84,8 @@ class Affichage:
 
         # Activer la modification de la zone de texte
         zone_texte.config(state=tk.DISABLED)
-        
+
+    '''Visualiser la distribution'''
     def visualiser_distribution(self, mot, vocabulaire, mat_TFxIDF):
         # Trouver l'indice du mot dans le vocabulaire
         mot_index = vocabulaire.index(mot)
@@ -102,37 +104,3 @@ class Affichage:
         plt.tight_layout()
         plt.show()
         
-    def mesure_corpus(self, corpus, zone_texte):
-        zone_texte.config(state=tk.NORMAL)
-
-        # Utiliser la matrice TF-IDF du corpus pour la transformation
-        _, _, vocabulaire_corpus, _, _, mat_TFxIDF_corpus = corpus.creer_vocabulaire()
-
-        # Trier le vocabulaire une fois
-        vocabulaire_corpus_trie = sorted(vocabulaire_corpus, key=lambda mot: (not mot.isdigit(), int(mot) if mot.isdigit() else mot.lower()))
-
-        # Transformer les documents en vecteurs TF-IDF (utiliser un sous-ensemble de documents si nécessaire)
-        corpus_texte_nettoye = [corpus.nettoyer_texte(doc.texte) for doc in list(corpus.id2doc.values())[:100]]  # Limiter à 100 documents
-        vectorizer = TfidfVectorizer(vocabulary=vocabulaire_corpus_trie, use_idf=False)
-        corpus_vecteur = vectorizer.fit_transform(corpus_texte_nettoye)
-
-        zone_texte.config(state=tk.NORMAL)
-        zone_texte.delete(1.0, tk.END)
-
-        # Afficher la mesure TDxIDF pour chaque mot du corpus dans la zone de texte
-        zone_texte.insert(tk.END, "Mesure TDxIDF pour chaque mot du corpus :\n\n")
-        for mot, indice in zip(vocabulaire_corpus_trie, range(len(vocabulaire_corpus_trie))):
-            tfidf_corpus = mat_TFxIDF_corpus[:, indice].tolist()
-            
-            # Ajouter le mot au texte (en bleu et souligné)
-            zone_texte.tag_configure(f"bleu_souligne_{indice}", foreground="blue", underline=True)
-            zone_texte.insert(tk.END, f"Mot : {mot}\n", "gras")
-
-            # Ajouter le mot au texte (en lien pour la visualisation)
-            zone_texte.tag_configure(f"visualisation_mot_{indice}", foreground="blue", underline=True)
-            zone_texte.insert(tk.END, "Visualiser la distribution\n", f"visualisation_mot_{indice}")
-            zone_texte.tag_bind(f"visualisation_mot_{indice}", "<Button-1>", lambda event, mot=mot: self.visualiser_distribution(mot, vocabulaire_corpus_trie, mat_TFxIDF_corpus))
-
-            zone_texte.insert(tk.END, f"Corpus - TDxIDF : {tfidf_corpus}\n\n")
-
-        zone_texte.config(state=tk.DISABLED)

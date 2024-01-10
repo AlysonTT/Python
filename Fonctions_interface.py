@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import matplotlib.pyplot as plt
@@ -274,11 +275,7 @@ def effectuer_recherche(corpus, zone_texte, mots_clefs, date, source, variables,
         # Désactiver la modification de la zone de texte
         zone_texte.config(state=tk.DISABLED)
        
-'''Section 3 : Affichage des Détails des Documents Sélectionnés''' 
-
-'''Section 4 : Affichage du Corpus dans son intégralité'''
-
-'''Section 5 : Comparer deux documents'''
+'''Section 3 : Comparer deux documents'''
 def comparer_documents(corpus, zone_texte, vars_afficher, vars_comparer, numDoc):
     # Récupérer les documents sélectionnés en utilisant l'identifiant unique
     numeros_selectionnes = [doc for doc, var in vars_comparer.items() if var.get()]
@@ -363,7 +360,7 @@ def comparer_documents(corpus, zone_texte, vars_afficher, vars_comparer, numDoc)
 
     zone_texte.config(state=tk.DISABLED)  # Désactive la possibilité d'éditer la zone de texte
       
-'''Section 6 : Clear les boutons pour afficher ou comparer'''
+'''Section 4 : Clear les boutons pour afficher ou comparer'''
 '''
 Désélectionne tous les boutons associés aux variables d'affichage et de comparaison.
 
@@ -382,11 +379,44 @@ def clear_tous_les_boutons(vars_afficher, vars_comparer):
     for var_comparer in vars_comparer.values():
         var_comparer.set(0)
     
-'''Section 7 : Mesurer le corpus'''   
+'''Section 5 : Mesurer le corpus'''   
+def mesure_corpus(corpus, zone_texte):
+        zone_texte.config(state=tk.NORMAL)
 
-'''Section 8 : Visualiser la distribution'''
+        # Utiliser la matrice TF-IDF du corpus pour la transformation
+        _, _, vocabulaire_corpus, _, _, mat_TFxIDF_corpus = corpus.creer_vocabulaire()
 
-'''Section 9 : Généner la frise temporelle d'un mot'''
+        # Trier le vocabulaire une fois
+        vocabulaire_corpus_trie = sorted(vocabulaire_corpus, key=lambda mot: (not mot.isdigit(), int(mot) if mot.isdigit() else mot.lower()))
+
+        # Transformer les documents en vecteurs TF-IDF (utiliser un sous-ensemble de documents si nécessaire)
+        corpus_texte_nettoye = [corpus.nettoyer_texte(doc.texte) for doc in list(corpus.id2doc.values())[:100]]  # Limiter à 100 documents
+        vectorizer = TfidfVectorizer(vocabulary=vocabulaire_corpus_trie, use_idf=False)
+        corpus_vecteur = vectorizer.fit_transform(corpus_texte_nettoye)
+
+        zone_texte.config(state=tk.NORMAL)
+        zone_texte.delete(1.0, tk.END)
+
+        # Afficher la mesure TDxIDF pour chaque mot du corpus dans la zone de texte
+        zone_texte.insert(tk.END, "Mesure TDxIDF pour chaque mot du corpus :\n\n")
+        for mot, indice in zip(vocabulaire_corpus_trie, range(len(vocabulaire_corpus_trie))):
+            tfidf_corpus = mat_TFxIDF_corpus[:, indice].tolist()
+            
+            # Ajouter le mot au texte (en bleu et souligné)
+            zone_texte.tag_configure(f"bleu_souligne_{indice}", foreground="blue", underline=True)
+            zone_texte.insert(tk.END, f"Mot : {mot}\n", "gras")
+            from Affichage import Affichage
+            affichage = Affichage()
+            # Ajouter le mot au texte (en lien pour la visualisation)
+            zone_texte.tag_configure(f"visualisation_mot_{indice}", foreground="blue", underline=True)
+            zone_texte.insert(tk.END, "Visualiser la distribution\n", f"visualisation_mot_{indice}")
+            zone_texte.tag_bind(f"visualisation_mot_{indice}", "<Button-1>", lambda mot=mot: affichage.visualiser_distribution(mot, vocabulaire_corpus_trie, mat_TFxIDF_corpus))
+
+            zone_texte.insert(tk.END, f"Corpus - TDxIDF : {tfidf_corpus}\n\n")
+
+        zone_texte.config(state=tk.DISABLED)
+ 
+'''Section 6 : Généner la frise temporelle d'un mot'''
 def generer_frise_temporelle(corpus, entry_mot_temporel):
     if entry_mot_temporel.get():
         mot_recherche = entry_mot_temporel.get()
@@ -395,7 +425,6 @@ def generer_frise_temporelle(corpus, entry_mot_temporel):
         mots = mot_recherche.strip().split()
         
         if len(mots) == 1:
-            print("MOT DE LONGUEUR 1")
             # On va recuperer les donnees temporelle du mot entrez par l'utilisateur
             informations_temporelles = corpus.extraire_informations_temporelles(mot_recherche)
                 
