@@ -40,6 +40,12 @@ liste_auteurs = sorted(list(liste_auteurs))
 def configurer_barre_defilement(event):
     zone_texte.yview_scroll(-1 * (event.delta // 120), "units")
 
+'''
+ESSAI 
+'''
+from Affichage import Affichage
+affichage = Affichage()
+
 '''Section 5 : Création de la fenêtre avec ses différents éléments'''
 # Créer une nouvelle fenêtre Tkinter
 fenetre = tk.Tk()
@@ -149,8 +155,7 @@ bouton_recherche = Button(cadre_boutons_options, text="Rechercher", command=lamb
 bouton_recherche.grid(row=0, column=3, padx=5)
 
 # Créer un bouton pour afficher tout le corpus
-from Fonctions_interface import afficher_corpus
-bouton_afficher_corpus = Button(cadre_boutons_options, text="Afficher Tout le Corpus", command=lambda: afficher_corpus(corpus, zone_texte, checkbutton, checkbutton_vars_afficher, checkbutton_vars_comparer))
+bouton_afficher_corpus = Button(cadre_boutons_options, text="Afficher Tout le Corpus", command=lambda: affichage.afficher_corpus(corpus, zone_texte, checkbutton, checkbutton_vars_afficher, checkbutton_vars_comparer))
 bouton_afficher_corpus.grid(row=0, column=4, padx=5)
 
 # Ajoutez cette ligne dans la création du cadre_boutons
@@ -158,8 +163,7 @@ from Fonctions_interface import clear_tous_les_boutons
 bouton_clear = Button(cadre_boutons_options, text="Clear", command=lambda: clear_tous_les_boutons(checkbutton_vars_afficher, checkbutton_vars_comparer))
 bouton_clear.grid(row=1, column=2, padx=5)
 
-from Fonctions_interface import mesure_corpus
-bouton_mesure = Button(cadre_boutons_options, text="Mesure du corpus", command=lambda: mesure_corpus(corpus, zone_texte))
+bouton_mesure = Button(cadre_boutons_options, text="Mesure du corpus", command=lambda: affichage.mesure_corpus(corpus, zone_texte))
 bouton_mesure.grid(row=1, column=3, padx=5)
 
 
