@@ -21,7 +21,7 @@
 - praw : est utilisé spécifiquement pour interagir avec l'API de Reddit.
 - urllib : pour travailler avec des ressources web tel que les URLs.
 
-Commande pour les intallées : **pip install scikit-learn matplotlib numpy**
+Commande pour les intallées : **pip install scikit-learn matplotlib numpy praw urllib3**
 
 ## Utilisation
 1. Sur Visual Studio Code, ouvrir le projet *Python*.
