@@ -49,6 +49,8 @@ from Selection import Selection
 selection = Selection()
 from Deselection import Deselection
 deselection = Deselection()
+from RechercheAnalyse import RechercheAnalyse
+rechercheAnalyse = RechercheAnalyse()
 
 '''Section 5 : Création de la fenêtre avec ses différents éléments'''
 # Créer une nouvelle fenêtre Tkinter
@@ -112,7 +114,6 @@ variables = [tk.IntVar() for _ in source]
 
 # Créer les Checkbuttons et les ajouter au sous-cadre
 for i, option in enumerate(source):
-    #from Fonctions_interface import selection_unique
     checkbutton = tk.Checkbutton(cadre_sources, text=option, variable=variables[i], command=lambda i=i: selection.selection_unique(i, variables))
     checkbutton.grid(row=1, column=i, padx=5, pady=5)
 
@@ -130,7 +131,6 @@ for auteur in liste_auteurs:
 listebox_auteurs.grid(row=1, column=1, padx=5, pady=10, sticky="nsew")
     
 # Checkbutton pour désélectionner tous les auteurs
-#from Fonctions_interface import deselectionner_tous_les_auteurs
 checkbutton_deselection = tk.Checkbutton(cadre_auteurs, text="Désélectionner tous les auteurs", command=lambda: deselection.deselectionner_tous_les_auteurs(listebox_auteurs, checkbutton_deselection))
 checkbutton_deselection.grid(row=2, column=1, pady=5)
 
@@ -154,8 +154,7 @@ entry_date = Entry(cadre_date, width=20)
 entry_date.grid(row=1, column=2, pady=5)
 
 # Créer un bouton pour effectuer la recherche
-from Fonctions_interface import effectuer_recherche
-bouton_recherche = Button(cadre_boutons_options, text="Rechercher", command=lambda: effectuer_recherche(corpus, zone_texte, entry_mots_clefs, entry_date, source, variables, listebox_auteurs, checkbutton_vars_afficher, checkbutton_vars_comparer))
+bouton_recherche = Button(cadre_boutons_options, text="Rechercher", command=lambda: rechercheAnalyse.effectuer_recherche(corpus, zone_texte, entry_mots_clefs, entry_date, source, variables, listebox_auteurs, checkbutton_vars_afficher, checkbutton_vars_comparer))
 bouton_recherche.grid(row=0, column=3, padx=5)
 
 # Créer un bouton pour afficher tout le corpus
@@ -163,12 +162,10 @@ bouton_afficher_corpus = Button(cadre_boutons_options, text="Afficher Tout le Co
 bouton_afficher_corpus.grid(row=0, column=4, padx=5)
 
 # Ajoutez cette ligne dans la création du cadre_boutons
-#from Fonctions_interface import clear_tous_les_boutons
 bouton_clear = Button(cadre_boutons_options, text="Clear", command=lambda: deselection.clear_tous_les_boutons(checkbutton_vars_afficher, checkbutton_vars_comparer))
 bouton_clear.grid(row=1, column=2, padx=5)
 
-from Fonctions_interface import mesure_corpus
-bouton_mesure = Button(cadre_boutons_options, text="Mesure du corpus", command=lambda: mesure_corpus(corpus, zone_texte))
+bouton_mesure = Button(cadre_boutons_options, text="Mesure du corpus", command=lambda: rechercheAnalyse.mesure_corpus(corpus, zone_texte))
 bouton_mesure.grid(row=1, column=3, padx=5)
 
 
@@ -201,8 +198,7 @@ cadre_temporel = tk.Frame(fenetre)
 cadre_temporel.pack()
 
 # Créer un bouton pour effectuer la recherche
-from Fonctions_interface import generer_frise_temporelle
-bouton_temporel = Button(cadre_temporel, text="Générer Frise Temporelle", command=lambda:generer_frise_temporelle(corpus, entry_temporel))
+bouton_temporel = Button(cadre_temporel, text="Générer Frise Temporelle", command=lambda:rechercheAnalyse.generer_frise_temporelle(corpus, entry_temporel))
 bouton_temporel.pack(side=tk.LEFT, padx=5)
 
 # Configurer la barre de défilement pour répondre à la molette de la souris

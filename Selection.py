@@ -41,4 +41,3 @@ class Selection:
             return ", ".join(auteurs_selectionnes)
         else:
             return "null"
-
