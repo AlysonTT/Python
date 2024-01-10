@@ -196,7 +196,7 @@ class RechercheAnalyse:
                     bouton_comparer_doc = tk.Checkbutton(
                         zone_texte,
                         text="Comparer", variable=var_comparer, font=("Helvetica", 10),
-                        command=lambda doc=document: self.comparer_documents(corpus, zone_texte, vars_afficher, vars_comparer, doc.numDoc))
+                        command=lambda doc=document: affichage.comparer_documents(corpus, zone_texte, vars_afficher, vars_comparer, doc.numDoc))
                     bouton_comparer_doc.document = document
                     zone_texte.window_create(tk.END, window=bouton_comparer_doc)
                     zone_texte.insert(tk.END, "\n")
@@ -252,12 +252,14 @@ class RechercheAnalyse:
     '''Généner la frise temporelle d'un mot'''
     def generer_frise_temporelle(self, corpus, entry_mot_temporel):
         if entry_mot_temporel.get():
+            print("PAS VIDE")
             mot_recherche = entry_mot_temporel.get()
 
             # Vérifie qu'il y a un seul mot
             mots = mot_recherche.strip().split()
             
             if len(mots) == 1:
+                print("VAUT 1")
                 # On va recuperer les donnees temporelle du mot entrez par l'utilisateur
                 informations_temporelles = corpus.extraire_informations_temporelles(mot_recherche)
                     
@@ -285,5 +287,7 @@ class RechercheAnalyse:
                     plt.title(f'Évolution temporelle du mot "{mot_recherche}" dans le corpus')
 
                     plt.show()
+                else:
+                    messagebox.showerror("Erreur", "Aucune frise temporelle disponible pour le mot inscrit. Il n'est présent dans aucun contenu de documents.")
             else:
                 messagebox.showerror("Erreur", "Veuillez entrer un seul mot.")
