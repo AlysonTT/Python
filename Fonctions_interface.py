@@ -11,7 +11,6 @@ import re
 '''Cette section regroupe plusieurs fonctions utilitaires 
 qui facilitent la gestion des sélections d'utilisateurs, 
 la validation des dates et des auteurs, etc.'''
-
 #fonction qui permet d'avoir qu'un type de source selectionné
 def selection_unique(index, variables):
     for i, var in enumerate(variables):

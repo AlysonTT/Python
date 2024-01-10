@@ -1,5 +1,4 @@
 '''Section 1: Importation des bibliothèques'''
-
 import tkinter as tk
 from tkinter import Text, Scrollbar, Entry, Button, Label
 import pickle
