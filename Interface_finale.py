@@ -40,9 +40,7 @@ liste_auteurs = sorted(list(liste_auteurs))
 def configurer_barre_defilement(event):
     zone_texte.yview_scroll(-1 * (event.delta // 120), "units")
 
-'''
-ESSAI 
-'''
+'''Section 5 : importation des classes pour utiliser leurs fonctions par la suite'''
 from Affichage import Affichage
 affichage = Affichage()
 from Selection import Selection
@@ -52,7 +50,7 @@ deselection = Deselection()
 from RechercheAnalyse import RechercheAnalyse
 rechercheAnalyse = RechercheAnalyse()
 
-'''Section 5 : Création de la fenêtre avec ses différents éléments'''
+'''Section 6 : Création de la fenêtre avec ses différents éléments'''
 # Créer une nouvelle fenêtre Tkinter
 fenetre = tk.Tk()
 # Obtenez la largeur et la hauteur de l'écran

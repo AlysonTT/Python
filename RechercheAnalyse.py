@@ -191,15 +191,7 @@ class RechercheAnalyse:
                     zone_texte.insert(tk.END, f"Score de similarité: {score_document}\n")
                     
                     '''AJOUTER'''
-                    var_afficher = tk.IntVar()
-                    bouton_check = tk.Checkbutton(
-                        zone_texte, text="Afficher", variable=var_afficher, font=("Helvetica", 10),
-                        command=lambda doc=document, var=var_afficher: 
-                        (corpus, vars_afficher, zone_texte, doc.numDoc))
-                    bouton_check.document = document
-                    zone_texte.window_create(tk.END, window=bouton_check)
-                    zone_texte.insert(tk.END, "\n")
-                    
+                    var_afficher = tk.IntVar()                    
 
                     var_comparer = tk.IntVar()
                     bouton_comparer_doc = tk.Checkbutton(

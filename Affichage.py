@@ -193,4 +193,3 @@ class Affichage:
             messagebox.showwarning("Erreur", "Vous avez sélectionné plus de deux documents. Veuillez en choisir seulement deux.")
 
         zone_texte.config(state=tk.DISABLED)  # Désactive la possibilité d'éditer la zone de texte
-             
