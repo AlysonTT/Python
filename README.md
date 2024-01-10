@@ -12,6 +12,7 @@
 - scikit-learn
 - matplotlib
 - numpy
+
 Commande pour les intallées : pip install scikit-learn matplotlib numpy
 
 ## Utilisation
