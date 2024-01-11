@@ -189,3 +189,21 @@ class Corpus:
         vocab_mat_TF = {mot: {'id': info['id'], 'occurrences': somme_colonnes[info['id']], 'nb_doc': nombre_doc_contenant_mot[info['id']]} for mot, info in sorted(vocab.items())}
 
         return vocab, vocab_mat_TF, list(vocabulaire), freq, mat_TF, mat_TFxIDF
+    
+     #Fonction pour avoir les informations temporelle d'un mot
+    def extraire_informations_temporelles(self, mot_recherche):
+        informations_temporelles = {}
+
+        for doc_info in self.id2doc.values():
+            contenu = doc_info.texte  # Récupérer le texte
+            date = doc_info.date  # Récupérer la date
+
+            # Vérifier si le mot recherché est présent dans le contenu du document
+            for mot in contenu.split():
+                if mot in mot_recherche:
+                    # Ajouter les informations à la période correspondante
+                    if date not in informations_temporelles:
+                        informations_temporelles[date] = 0
+                    informations_temporelles[date] += 1
+
+        return informations_temporelles
